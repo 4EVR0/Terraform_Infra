@@ -108,3 +108,28 @@
 - 실제 EC2 생성 없이 Terraform 내장 리소스의 테스트 상태만 기록
 - 다음 단계의 S3 버전 복원용 로컬 스크립트 준비 및 Python 문법 검사 완료. 실행은 아직 미수행
 - S3 객체 버전 복원과 Terraform state 복원 후 plan 검증은 구분해 기록
+
+
+## 2026-09-09 — 사용자 실행으로 S3 객체 버전 복구 시험
+
+### 실행과 근거
+
+- 사용자가 로컬 recovery_probe.py를 실행해 PASS 출력 공유
+- 에이전트가 생성된 로컬 Markdown 결과 파일을 읽어 단계별 성공 기록 확인
+- Terraform 상태와 분리된 UUID별 테스트 객체에서 첫 내용 저장 → 두 번째 내용 저장 → 첫 버전 다운로드 → 새 최신 버전으로 재업로드 수행
+- 복원된 최신 객체의 VersionId 및 내용 일치 확인 기록 확보
+- 상세 버킷·key·VersionId는 비공개 로컬 기록에만 보관
+
+### 결과와 한계
+
+- S3 버전별 읽기와 이전 내용을 새 최신 버전으로 복원하는 절차 검증 완료
+- 이전 작업의 Terraform 잠금 경쟁·해제 확인과 함께 상태 저장소의 기초 운영 검증 확보
+- 실제 bootstrap/project/verification의 Terraform state 파일은 이번 복구 시험에서 수정하지 않음
+- Terraform state의 lineage·serial 및 복원 후 plan 검증은 미수행. 전체 상태 복구 훈련 완료로 표현하지 않음
+- 테스트 객체와 과거 버전은 보존 중
+
+### 다음 작업
+
+- 모니터링 EC2 한 대의 import 코드 초안 및 변경 없는 plan 준비
+- import 적용 전 기존 의존 자원의 참조·소유 범위 확인
+- Terraform state 자체의 복구 훈련은 별도 검증 대상으로 유지

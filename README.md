@@ -10,7 +10,8 @@
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
 - 활성 Terraform 구성: 기존 VPC·EC2를 읽는 `data` 블록만 포함
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
-- 아직 수행하지 않은 작업: 기존 자원 import, 실환경 잠금·복원 시험
+- 운영 검증: 사용자 실행으로 동시 실행 잠금·해제 및 별도 S3 객체 버전 복구 확인
+- 아직 수행하지 않은 작업: 기존 자원 import, Terraform state 자체의 복구 후 plan 검증
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -109,4 +110,4 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 작업 이력은 [작업 기록](docs/worklog.md), 인벤토리 도구의 범위와 한계는 [조사 절차](docs/discovery-workflow.md) 참조.
 
-공용 상태 저장소 구성은 `bootstrap/state/`, 설계와 적용 순서는 [상태 저장소 설계](docs/state-backend.md) 참조. 사용자 실행으로 버킷 생성 및 두 상태 객체 저장 확인. 실환경 잠금·복원 시험은 아직 미수행.
+공용 상태 저장소 구성은 `bootstrap/state/`, 설계와 적용 순서는 [상태 저장소 설계](docs/state-backend.md) 참조. 사용자 실행으로 버킷 생성 및 두 상태 객체 저장 확인. 동시 실행 잠금 및 별도 S3 객체 버전 복구 확인. Terraform state 자체의 복원 후 plan 검증은 미수행.
