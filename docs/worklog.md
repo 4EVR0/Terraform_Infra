@@ -97,3 +97,14 @@
 
 - 기존 state와 분리된 임시 key에서 동시 실행 잠금 및 버전 복원 시험
 - 이후 모니터링 EC2 한 대의 변경 없는 import plan 준비
+
+
+## 2026-09-09 — 사용자 실행으로 상태 잠금 시험
+
+- 기존 상태와 분리한 verification key에서 Terraform 내장 terraform_data와 60초 대기 사용
+- 사용자가 첫 apply 실행 중 두 번째 plan에서 상태 잠금 획득 오류 확인
+- 첫 실행 완료 후 같은 plan에서 No changes 확인
+- 결과: 사용자 실행 보고 기준 동시 접근 차단과 종료 후 잠금 해제 확인
+- 실제 EC2 생성 없이 Terraform 내장 리소스의 테스트 상태만 기록
+- 다음 단계의 S3 버전 복원용 로컬 스크립트 준비 및 Python 문법 검사 완료. 실행은 아직 미수행
+- S3 객체 버전 복원과 Terraform state 복원 후 plan 검증은 구분해 기록
