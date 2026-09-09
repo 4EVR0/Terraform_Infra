@@ -8,7 +8,7 @@
 - 서울 리전과 일부 글로벌 서비스의 AWS 실물 조회 완료
 - 실제 자원 목록·상태·보안 설정은 로컬 인벤토리에서 관리
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
-- 활성 Terraform 구성: 기존 VPC·EC2를 읽는 `data` 블록만 포함
+- 활성 Terraform 구성: 기존 VPC·EC2 조회와 모니터링 EC2 1대의 import 정의. 실제 import는 아직 미수행
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
 - 운영 검증: 사용자 실행으로 동시 실행 잠금·해제 및 별도 S3 객체 버전 복구 확인
 - 아직 수행하지 않은 작업: 기존 자원 import, Terraform state 자체의 복구 후 plan 검증
@@ -20,7 +20,7 @@
 - `terraform validate`: 통과
 - 실제 AWS 대상 조회용 `terraform plan`: 통과. 기존 VPC·EC2 조회, 출력값 추가만 제안
 - 인벤토리 스크립트: AWS 조회 실행 완료, Python 문법 검사 통과
-- 자원 편입용 plan은 아직 생성하지 않음. 조회용 plan은 로컬 `.local/discovery.tfplan`에 보관
+- 모니터링 EC2 import 계획 검증 완료. 실제 apply 및 이후 변경 없음 확인은 미수행
 
 ## 범위
 
@@ -51,7 +51,9 @@ Terraform_Infra/
 │   ├── variables.tf            # 실제 계정·자원 ID를 외부 입력으로 분리
 │   ├── terraform.tfvars.example # 실제 값 없는 설정 예시
 │   ├── .terraform.lock.hcl     # 실제 provider 버전·체크섬
-│   ├── imports.tf.example     # 첫 import 후보, 현재 비활성
+│   ├── imports.tf             # 모니터링 EC2 import 선언
+│   ├── monitoring.tf          # 검토한 EC2 속성 관리
+│   ├── monitoring-variables.tf # 비공개 설정의 입력 타입
 │   ├── backend.tf.example     # 원격 상태 저장 설정, 현재 비활성
 │   └── backend.tfbackend.example
 ├── inventory/raw/              # 로컬 전용 원본 응답, Git 제외
@@ -84,7 +86,7 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 .local/bin/terraform -chdir=environments/project plan
 ```
 
-- 현재 `plan`은 VPC·EC2 조회와 출력값 계산만 수행
+- 현재 `plan`은 모니터링 EC2 import 1개를 제안. PR 머지 후 새 plan을 검토하고 사용자가 직접 적용
 - 새 checkout은 실제 버킷·key·계정 제한이 담긴 로컬 `.tfbackend` 파일을 비공개로 준비한 뒤 초기화
 - `.example` 파일은 Terraform이 읽지 않는 검토용 파일
 - provider의 `allowed_account_ids`로 다른 계정에 대한 실행 방지
@@ -111,3 +113,5 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 작업 이력은 [작업 기록](docs/worklog.md), 인벤토리 도구의 범위와 한계는 [조사 절차](docs/discovery-workflow.md) 참조.
 
 공용 상태 저장소 구성은 `bootstrap/state/`, 설계와 적용 순서는 [상태 저장소 설계](docs/state-backend.md) 참조. 사용자 실행으로 버킷 생성 및 두 상태 객체 저장 확인. 동시 실행 잠금 및 별도 S3 객체 버전 복구 확인. Terraform state 자체의 복원 후 plan 검증은 미수행.
+
+첫 편입의 범위와 사용자 적용 절차는 [모니터링 EC2 import](docs/import-monitoring.md) 참조. 앞으로 작업 브랜치 → PR → 리뷰·머지 → 새 plan 검토 → 사용자 apply 순서로 진행.
