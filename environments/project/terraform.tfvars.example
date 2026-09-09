@@ -1,5 +1,8 @@
 # Copy to local.auto.tfvars on a new checkout, then replace placeholders.
 # If local.auto.tfvars.json already exists, edit that file instead.
+# The monitoring import also requires monitoring_config, whose full object schema
+# is defined in monitoring-variables.tf. Obtain reviewed values privately;
+# do not derive desired settings dynamically from the live instance on every plan.
 aws_account_id = "<AWS_ACCOUNT_ID>"
 aws_region     = "ap-northeast-2"
 vpc_id         = "<VPC_ID>"

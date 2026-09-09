@@ -1,4 +1,4 @@
-# Read-only kickoff: these data sources do not adopt or modify resources.
+# Observations remain read-only; monitoring is adopted separately by monitoring.tf.
 data "aws_vpc" "existing" {
   id = var.vpc_id
 }
