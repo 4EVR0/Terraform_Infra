@@ -1,0 +1,4 @@
+# Activate only after creating and verifying the bucket, then migrate local state.
+terraform {
+  backend "s3" {}
+}
