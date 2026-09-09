@@ -1,0 +1,8 @@
+# Copy to local.auto.tfvars on a new checkout, then replace placeholders.
+# If local.auto.tfvars.json already exists, edit that file instead.
+aws_account_id = "<AWS_ACCOUNT_ID>"
+aws_region     = "ap-northeast-2"
+vpc_id         = "<VPC_ID>"
+instance_ids = {
+  monitoring = "<MONITORING_INSTANCE_ID>"
+}

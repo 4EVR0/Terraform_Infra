@@ -1,0 +1,17 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+*.tfbackend
+!*.tfbackend.example
+crash.log
+crash.*.log
+.local/
+inventory/raw/
+docs/inventory*.md
+__pycache__/
+.env
+# Keep .terraform.lock.hcl in version control.
