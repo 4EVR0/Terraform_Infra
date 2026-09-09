@@ -73,6 +73,9 @@ cp environments/project/terraform.tfvars.example environments/project/local.auto
 # 실제 계정 ID를 환경 변수에 설정한 뒤 읽기 전용 조회 실행.
 python3 scripts/inventory.py --profile default --regions ap-northeast-2 --expected-account-id "$AWS_EXPECTED_ACCOUNT_ID"
 
+# 활성화된 전체 리전의 지원 서비스 조회. --regions와 동시 사용 불가.
+python3 scripts/inventory.py --profile default --all-regions --expected-account-id "$AWS_EXPECTED_ACCOUNT_ID"
+
 .local/bin/terraform -chdir=environments/project init -backend=false
 .local/bin/terraform fmt -check -recursive
 .local/bin/terraform -chdir=environments/project validate
@@ -85,9 +88,12 @@ python3 scripts/inventory.py --profile default --regions ap-northeast-2 --expect
 - 원본 응답·상태·plan은 공개 문서에 붙이지 않고 로컬 보관
 - 실제 AWS 계정·자원 ID는 Git에서 제외된 `local.auto.tfvars` 또는 `local.auto.tfvars.json`에 입력
 - 상세 인벤토리 `docs/inventory*.md`는 로컬에만 보관. 공개 문서에는 실제 ID·접속 주소·보안 설정을 기록하지 않음
+- 상세 작업 일지·조사 근거·자원별 소유 범위는 `docs/private/`에 기록하고 Git에서 제외
 - `sensitive` 출력은 화면 표시를 줄이는 기능이며, state·plan에 값이 저장되는 것을 막지 않음
 - 인벤토리의 `ABSENT`: 해당 설정이 없다는 API 응답. `UNRESOLVED`: 권한·통신 등으로 확인하지 못한 항목
 - 서비스 목록 조회는 선택한 API 범위만 포함. 빈 결과와 미조회 항목 구분 필수
+
+인벤토리 회귀 검사: `python3 -m unittest discover -s tests -v`. 계정 불일치 중단, 활성 리전 선택, 권한 오류와 설정 부재의 구분 검증. 테스트는 실제 AWS에 접근하지 않음.
 
 ## 다음 작업
 

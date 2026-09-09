@@ -12,6 +12,7 @@ crash.*.log
 .local/
 inventory/raw/
 docs/inventory*.md
+docs/private/
 __pycache__/
 .env
 # Keep .terraform.lock.hcl in version control.

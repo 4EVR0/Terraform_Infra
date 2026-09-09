@@ -16,7 +16,10 @@ import subprocess
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--regions", nargs="+", default=["ap-northeast-2"])
+    region_args = parser.add_mutually_exclusive_group()
+    region_args.add_argument("--regions", nargs="+", default=["ap-northeast-2"])
+    region_args.add_argument("--all-regions", action="store_true",
+                             help="Query selected services in every enabled AWS region.")
     parser.add_argument("--profile", default="default")
     parser.add_argument("--expected-account-id", required=True,
                         help="Expected 12-digit AWS account ID; stops on mismatch.")
@@ -48,6 +51,8 @@ def main():
                     "NoSuchTagSet", "NoSuchBucketPolicy", "NoSuchLifecycleConfiguration",
                     "NoSuchPublicAccessBlockConfiguration",
                     "ServerSideEncryptionConfigurationNotFoundError",
+                    "OwnershipControlsNotFoundError",
+                    "RepositoryPolicyNotFoundException", "LifecyclePolicyNotFoundException",
                 }
         except (subprocess.TimeoutExpired, OSError, ValueError) as exc:
             result.update(ok=False, error=str(exc))
@@ -58,8 +63,18 @@ def main():
     if not identity["ok"] or identity["data"].get("Account") != args.expected_account_id:
         raise SystemExit("Expected project account could not be verified; stopped. See local identity.json.")
 
+    regions_result = query("regions", "ec2", "describe-regions")
+    if args.all_regions:
+        if not regions_result["ok"]:
+            raise SystemExit("Enabled regions could not be verified; stopped.")
+        args.regions = sorted(region["RegionName"] for region in regions_result["data"]["Regions"])
+    print(f"Scanning {len(args.regions)} region(s); raw responses remain local.", flush=True)
     jobs = [
-        ("regions", "ec2", "describe-regions"),
+        ("iam-roles", "iam", "list-roles"),
+        ("iam-users", "iam", "list-users"),
+        ("iam-oidc", "iam", "list-open-id-connect-providers"),
+        ("s3-account-public-access", "s3control", "get-public-access-block", "ap-northeast-2",
+         ("--account-id", args.expected_account_id)),
         ("buckets", "s3api", "list-buckets"),
         ("hosted-zones", "route53", "list-hosted-zones"),
         ("cloudfront", "cloudfront", "list-distributions"),
@@ -75,6 +90,17 @@ def main():
         ("nat-gateways", "ec2", "describe-nat-gateways"),
         ("addresses", "ec2", "describe-addresses"),
         ("rds", "rds", "describe-db-instances"),
+        ("rds-clusters", "rds", "describe-db-clusters"),
+        ("ecs", "ecs", "list-clusters"),
+        ("eks", "eks", "list-clusters"),
+        ("dynamodb", "dynamodb", "list-tables"),
+        ("elasticache", "elasticache", "describe-cache-clusters"),
+        ("classic-elb", "elb", "describe-load-balancers"),
+        ("athena", "athena", "list-work-groups"),
+        ("log-groups", "logs", "describe-log-groups"),
+        ("eventbridge-rules", "events", "list-rules"),
+        ("backup-vaults", "backup", "list-backup-vaults"),
+        ("kms", "kms", "list-aliases"),
         ("queues", "sqs", "list-queues"),
         ("ecr", "ecr", "describe-repositories"),
         ("glue", "glue", "get-databases"),
@@ -84,6 +110,11 @@ def main():
     for region in args.regions:
         jobs.extend((f"{region}-{label}", service, operation, region)
                     for label, service, operation in operations)
+        jobs.append((f"{region}-snapshots", "ec2", "describe-snapshots", region,
+                     ("--owner-ids", "self", "--query",
+                      "Snapshots[].{Id:SnapshotId,Volume:VolumeId,Size:VolumeSize,State:State,Time:StartTime,Encrypted:Encrypted,Tags:Tags}")))
+        jobs.append((f"{region}-alarms", "cloudwatch", "describe-alarms", region,
+                     ("--query", "{Metric:MetricAlarms[].{Name:AlarmName,Namespace:Namespace,Metric:MetricName,State:StateValue},Composite:CompositeAlarms[].{Name:AlarmName,State:StateValue}}")))
         # Omit Lambda environment variables from the captured output.
         jobs.append((f"{region}-lambda", "lambda", "list-functions", region,
                      ("--query", "Functions[].{Name:FunctionName,Arn:FunctionArn,Role:Role,Runtime:Runtime,PackageType:PackageType}")))
@@ -105,9 +136,25 @@ def main():
                 if location["ok"]:
                     for operation in ("get-bucket-versioning", "get-bucket-encryption",
                                       "get-public-access-block", "get-bucket-tagging",
-                                      "get-bucket-policy", "get-bucket-lifecycle-configuration"):
+                                      "get-bucket-policy", "get-bucket-lifecycle-configuration",
+                                      "get-bucket-acl", "get-bucket-ownership-controls",
+                                      "get-bucket-logging", "get-bucket-notification-configuration"):
                         details.append(query(f"s3-{name}-{operation}", "s3api", operation,
                                              bucket_region, ("--bucket", name)))
+        if result["label"].endswith("-ecr"):
+            for repository in result["data"].get("repositories", []):
+                name = repository["repositoryName"]
+                for operation in ("get-repository-policy", "get-lifecycle-policy"):
+                    # Repository names may contain slashes; use a stable safe label.
+                    label = name.encode().hex()
+                    details.append(query(f"{result['region']}-ecr-{label}-{operation}", "ecr", operation,
+                                         result["region"], ("--repository-name", name)))
+        if result["label"].endswith("-glue"):
+            for database in result["data"].get("DatabaseList", []):
+                name = database["Name"]
+                details.append(query(f"{result['region']}-glue-tables-{name.encode().hex()}", "glue", "get-tables",
+                                     result["region"], ("--database-name", name, "--query",
+                                     "TableList[].{Name:Name,Type:TableType,Location:StorageDescriptor.Location,Created:CreateTime,Updated:UpdateTime}")))
     profiles = set()
     for result in results:
         if result["ok"] and result["label"].endswith("-instances"):
@@ -125,12 +172,28 @@ def main():
         for role in result["data"]["InstanceProfile"]["Roles"]:
             name = role["RoleName"]
             for operation in ("list-attached-role-policies", "list-role-policies"):
-                details.append(query(f"iam-{name}-{operation}", "iam", operation,
-                                     extra=("--role-name", name)))
-    all_results = [identity, *results, *details]
+                policy_list = query(f"iam-{name}-{operation}", "iam", operation,
+                                    extra=("--role-name", name))
+                details.append(policy_list)
+                if not policy_list["ok"]:
+                    continue
+                for policy_name in policy_list["data"].get("PolicyNames", []):
+                    details.append(query(f"iam-{name}-inline-{policy_name}", "iam", "get-role-policy",
+                                         extra=("--role-name", name, "--policy-name", policy_name)))
+                for policy in policy_list["data"].get("AttachedPolicies", []):
+                    arn = policy["PolicyArn"]
+                    label = arn.encode().hex()
+                    metadata = query(f"iam-policy-{label}", "iam", "get-policy",
+                                     extra=("--policy-arn", arn))
+                    details.append(metadata)
+                    if metadata["ok"]:
+                        version = metadata["data"]["Policy"]["DefaultVersionId"]
+                        details.append(query(f"iam-policy-{label}-{version}", "iam", "get-policy-version",
+                                             extra=("--policy-arn", arn, "--version-id", version)))
+    all_results = [identity, regions_result, *results, *details]
     manifest = {
         "recorded_at_utc": stamp, "regions": args.regions,
-        "scope": "Selected services in requested regions; global buckets, DNS, CloudFront and attached instance profiles. Not exhaustive.",
+        "scope": "Selected service APIs in requested/enabled regions; global S3, DNS, CloudFront, IAM identities and policies of EC2-attached roles. Not exhaustive; nested resources and additional services may remain.",
         "results": [{key: value for key, value in item.items() if key != "data"} for item in all_results],
     }
     (destination / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
