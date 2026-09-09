@@ -9,7 +9,8 @@
 - 실제 자원 목록·상태·보안 설정은 로컬 인벤토리에서 관리
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
 - 활성 Terraform 구성: 기존 VPC·EC2를 읽는 `data` 블록만 포함
-- 아직 수행하지 않은 작업: 상태 저장 버킷 생성, 자원 import, AWS 설정 변경, 서버 기동
+- 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
+- 아직 수행하지 않은 작업: 기존 자원 import, 실환경 잠금·복원 시험
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -76,13 +77,14 @@ python3 scripts/inventory.py --profile default --regions ap-northeast-2 --expect
 # 활성화된 전체 리전의 지원 서비스 조회. --regions와 동시 사용 불가.
 python3 scripts/inventory.py --profile default --all-regions --expected-account-id "$AWS_EXPECTED_ACCOUNT_ID"
 
-.local/bin/terraform -chdir=environments/project init -backend=false
+.local/bin/terraform -chdir=environments/project init -backend-config=../../.local/project.tfbackend
 .local/bin/terraform fmt -check -recursive
 .local/bin/terraform -chdir=environments/project validate
 .local/bin/terraform -chdir=environments/project plan
 ```
 
 - 현재 `plan`은 VPC·EC2 조회와 출력값 계산만 수행
+- 새 checkout은 실제 버킷·key·계정 제한이 담긴 로컬 `.tfbackend` 파일을 비공개로 준비한 뒤 초기화
 - `.example` 파일은 Terraform이 읽지 않는 검토용 파일
 - provider의 `allowed_account_ids`로 다른 계정에 대한 실행 방지
 - 원본 응답·상태·plan은 공개 문서에 붙이지 않고 로컬 보관
@@ -107,4 +109,4 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 작업 이력은 [작업 기록](docs/worklog.md), 인벤토리 도구의 범위와 한계는 [조사 절차](docs/discovery-workflow.md) 참조.
 
-공용 상태 저장소 구성은 `bootstrap/state/`, 설계와 적용 순서는 [상태 저장소 설계](docs/state-backend.md) 참조. 버킷 생성과 원격 상태 이전은 아직 미수행.
+공용 상태 저장소 구성은 `bootstrap/state/`, 설계와 적용 순서는 [상태 저장소 설계](docs/state-backend.md) 참조. 사용자 실행으로 버킷 생성 및 두 상태 객체 저장 확인. 실환경 잠금·복원 시험은 아직 미수행.

@@ -72,3 +72,28 @@
 - 동시 실행 잠금과 버전 복구는 별도 검증 key에서 시험 예정
 
 설계 근거와 절차는 [상태 저장소 설계](state-backend.md) 참조.
+
+
+## 2026-09-09 — 사용자 실행으로 S3 backend 활성화
+
+### 실행과 확인 근거
+
+- 사용자가 bootstrap 생성 계획 적용 후 `No changes` 출력 공유
+- bootstrap에서 S3 backend 활성화 및 상태 이전 절차 수행 후 `No changes` 출력 공유
+- S3 콘솔에서 bootstrap 상태 객체 확인을 사용자 보고로 확보
+- project의 backend 초기화 후 실제 자원 변경 없이 출력값만 저장하는 plan 공유
+- project 상태 저장 절차 이후 두 상태 객체가 모두 존재함을 사용자 확인
+- 로컬에서 두 backend.tf 파일의 S3 backend 선언 확인
+
+### 기록 범위
+
+- 이 단계의 AWS 실행과 콘솔 확인은 사용자 수행. 에이전트가 S3 객체 내용이나 실제 잠금 동작을 재검증한 것은 아님
+- project의 최종 `No changes` 출력은 별도로 전달받지 않음. 두 상태 객체 존재 확인과 구분
+- bootstrap과 project의 backend 선언만 공개 코드에 포함
+- 버킷·계정 등 실제 backend 값, state와 백업은 Git에서 제외
+- 기존 EC2는 아직 조회용 data source이며 import 미수행
+
+### 다음 작업
+
+- 기존 state와 분리된 임시 key에서 동시 실행 잠금 및 버전 복원 시험
+- 이후 모니터링 EC2 한 대의 변경 없는 import plan 준비
