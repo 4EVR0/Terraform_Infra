@@ -133,3 +133,19 @@
 - 모니터링 EC2 한 대의 import 코드 초안 및 변경 없는 plan 준비
 - import 적용 전 기존 의존 자원의 참조·소유 범위 확인
 - Terraform state 자체의 복구 훈련은 별도 검증 대상으로 유지
+
+
+## 2026-09-10 — 모니터링 EC2 import 계획 준비
+
+- 사용자가 생성한 feat/import-monitoring-ec2 브랜치에서 작업
+- 합의한 PR 기반 작업 흐름을 AGENTS.md에 기록. main 직접 푸시 및 자동 머지 금지
+- AWS에서 import용 구성 초안을 읽기 전용 생성
+- 자동 생성된 네트워크·IPv6 상충 옵션 및 계산 속성 정리
+- 실제 속성은 비공개 monitoring_config 입력으로 분리, prevent_destroy 적용
+- 실제 plan 결과: 1 to import, 0 to add, 0 to change, 0 to destroy
+- plan JSON의 대상 ID·주소·무변경 조건 검사 PASS
+- fmt·validate와 Python 회귀 테스트 9개 통과
+- 공개 문서에는 실제 자원 식별자·설정값·plan 미포함
+- 실제 apply는 미수행. PR 머지 후 사용자가 새 plan을 생성·검토하여 적용 예정
+
+세부 구현 선택과 절차는 [모니터링 EC2 편입](import-monitoring.md) 참조.

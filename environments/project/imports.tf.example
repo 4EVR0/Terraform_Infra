@@ -1,6 +1,0 @@
-# Candidate for the first small import batch. Not loaded by Terraform.
-# Generate/review aws_instance.monitoring configuration before adopting.
-import {
-  to = aws_instance.monitoring
-  id = var.instance_ids["monitoring"]
-}

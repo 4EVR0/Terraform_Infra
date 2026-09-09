@@ -44,7 +44,7 @@
 
 1. 최신 상태 재조회: AMI·유형·서브넷·보안 그룹·IAM 프로파일·루트 디스크·태그
 2. 기존 보안 그룹·프로파일은 우선 이름/ID로 참조
-3. `imports.tf.example`을 기반으로 import 블록 준비
+3. `imports.tf`의 모니터링 대상 import 블록과 실제 ID 확인
 4. `terraform plan -generate-config-out=generated.tf`로 현재 속성에 기반한 코드 초안 생성
 5. 생성된 코드의 불필요한 계산값·충돌 속성·민감값 검토, `prevent_destroy` 적용 검토
 6. 저장할 plan에서 `1 to import, 0 to add, 0 to change, 0 to destroy` 확인
