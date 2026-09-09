@@ -104,3 +104,5 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 5. 나머지 자원 확대 및 복구 검증
 
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
+
+작업 이력은 [작업 기록](docs/worklog.md), 인벤토리 도구의 범위와 한계는 [조사 절차](docs/discovery-workflow.md) 참조.
