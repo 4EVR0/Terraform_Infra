@@ -22,7 +22,10 @@ resource "aws_instance" "monitoring" {
   subnet_id                            = var.monitoring_config.subnet_id
   tags                                 = var.monitoring_config.tags
   tenancy                              = var.monitoring_config.tenancy
-  vpc_security_group_ids               = var.monitoring_config.vpc_security_group_ids
+  vpc_security_group_ids = setunion(
+    setsubtract(var.monitoring_config.vpc_security_group_ids, [var.monitoring_security_group.id]),
+    [aws_security_group.monitoring.id],
+  )
   capacity_reservation_specification {
     capacity_reservation_preference = var.monitoring_config.capacity_reservation_specification.capacity_reservation_preference
   }
