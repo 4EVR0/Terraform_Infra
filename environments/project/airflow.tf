@@ -28,7 +28,10 @@ resource "aws_instance" "airflow" {
   subnet_id                            = var.airflow_config.subnet_id
   tags                                 = var.airflow_config.tags
   tenancy                              = var.airflow_config.tenancy
-  vpc_security_group_ids               = var.airflow_config.vpc_security_group_ids
+  vpc_security_group_ids = setunion(
+    setsubtract(var.airflow_config.vpc_security_group_ids, [var.airflow_security_group.id]),
+    [aws_security_group.airflow.id],
+  )
 
   capacity_reservation_specification {
     capacity_reservation_preference = var.airflow_config.capacity_reservation_specification.capacity_reservation_preference

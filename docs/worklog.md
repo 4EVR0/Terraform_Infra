@@ -365,3 +365,32 @@
 
 - Airflow 전용 보안 그룹·규칙과 IAM 역할·정책 연결의 소유 범위 조사
 - 종속 자원의 변경 없는 import 계획 준비
+
+## 2026-09-11 — Airflow 보안 그룹 import 계획 준비
+
+### 범위 조사
+
+- Airflow EC2에 연결된 보안 그룹 2개와 규칙·네트워크 인터페이스 관계를 AWS에서 읽기 전용으로 재조회
+- Airflow 전용 그룹은 네트워크 인터페이스 한 개에만 연결됨을 확인
+- 공용 SSH 그룹은 프로젝트 EC2 네 대가 공유하므로 이번 편입에서 제외
+- 전용 그룹 1개, 인바운드 규칙 3개, 아웃바운드 규칙 1개를 편입 대상으로 선정
+- 외부 접근 범위가 넓은 기존 규칙은 최초 편입에서 유지하고 별도 보안 개선 대상으로 기록
+
+### 구현과 트러블슈팅
+
+- 보안 그룹과 규칙을 별도 리소스로 정의하고 inline rule 혼용 방지
+- Airflow EC2가 관리 그룹을 참조하도록 전환하되 기존 그룹 ID 집합 유지
+- 실제 ID·규칙 소스는 Git 제외 로컬 tfvars로 분리
+- 그룹 연결 precondition, 규칙 소스 입력 검증, `prevent_destroy` 적용
+- 최초 plan의 update 1건을 전체 프로토콜 규칙 포트의 `-1`과 provider 정규화 값 `null` 차이로 확인
+- 전체 프로토콜 규칙의 포트를 `null`로 수정해 불필요한 변경 제거
+
+### 검증과 한계
+
+- 최종 plan: **5 to import, 0 to add, 0 to change, 0 to destroy**
+- 예상 주소→ID 대응과 기존 관리 자원 무변경 검사 통과
+- Terraform fmt·validate, Python 회귀 테스트 14개 통과
+- 실제 import는 미수행. PR 머지 후 main에서 새 plan·state 백업·사용자 apply 필요
+- 보안 정책 적정성, Airflow 애플리케이션 통신과 인증 상태는 이번 편입에서 검증하지 않음
+
+세부 범위와 적용 절차는 [Airflow 보안 그룹 편입](import-airflow-security-group.md) 참조.

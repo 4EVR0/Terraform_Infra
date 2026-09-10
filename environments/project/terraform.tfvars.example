@@ -13,6 +13,8 @@
 # local tfvars.
 # The Airflow EC2 import additionally requires airflow_config, whose full object
 # schema is defined in airflow-variables.tf. Obtain reviewed values privately.
+# The Airflow security group import additionally requires airflow_security_group,
+# defined in airflow-security-group-variables.tf, including stable rule keys.
 aws_account_id = "<AWS_ACCOUNT_ID>"
 aws_region     = "ap-northeast-2"
 vpc_id         = "<VPC_ID>"
