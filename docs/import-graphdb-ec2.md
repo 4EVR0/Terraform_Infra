@@ -57,6 +57,72 @@ HashiCorp는 plan과 state에 민감한 자원 속성이 포함될 수 있으므
 
 user data 수정은 서버 내부 파일이나 이미 설정된 계정 정보를 자동으로 지우지 않음. user data 삭제와 실제 자격 정보 교체를 모두 수행해야 함.
 
+## 단계별 실행 절차
+
+### 1. 다운타임 없는 사전 점검
+
+GraphDB 서버에 접속한 뒤 값의 내용은 출력하지 않고 상태와 파일 위치만 확인.
+
+```bash
+cd /path/to/GraphDB-Server
+docker compose ps
+sudo sshd -T | grep '^passwordauthentication'
+sudo find /home -xdev -type f \
+  \( -path '*/.ssh/authorized_keys' -o -name 'id_rsa' -o -name 'id_ed25519' -o -name '*.pem' \) \
+  -print
+```
+
+- 각 팀원의 현재 접속 방식과 필요한 계정 확인
+- 새 SSH 키는 각 팀원 장비에서 생성하고 공개키만 서버에 등록
+- 새 키로 별도 터미널 접속이 성공한 뒤 기존 키 제거
+- 저장소의 개발용 기본 비밀번호가 운영에서 재사용되었는지 확인하고, 재사용했다면 함께 교체
+- 실제 비밀번호·개인키·환경 변수 내용은 터미널 출력, 문서, 메신저에 복사하지 않음
+
+비밀번호 SSH를 사용하지 않는 것으로 확인되면 키 교체 후 비밀번호 로그인을 비활성화. SSH 설정은 문법 검사와 새 연결 성공을 확인하기 전까지 기존 세션을 닫지 않음.
+
+### 2. 점검 시간에 EC2 정지와 user data 삭제
+
+먼저 AWS 계정과 대상 인스턴스가 맞는지 확인하고, GraphDB 중지 시간을 팀에 공지. 아래 `GRAPHDB_INSTANCE_ID`는 Git 제외 로컬 입력에서 확인한 실제 값으로 설정.
+
+```bash
+aws sts get-caller-identity
+GRAPHDB_INSTANCE_ID="<REVIEWED_GRAPHDB_INSTANCE_ID>"
+
+aws ec2 stop-instances --instance-ids "$GRAPHDB_INSTANCE_ID"
+aws ec2 wait instance-stopped --instance-ids "$GRAPHDB_INSTANCE_ID"
+```
+
+인스턴스가 완전히 중지된 뒤 EC2 콘솔의 연결된 루트 볼륨에서 새 EBS 스냅샷 생성. 스냅샷이 완료된 것을 확인한 다음 user data 삭제.
+
+```bash
+aws ec2 modify-instance-attribute \
+  --instance-id "$GRAPHDB_INSTANCE_ID" \
+  --user-data 'Value='
+
+aws ec2 start-instances --instance-ids "$GRAPHDB_INSTANCE_ID"
+aws ec2 wait instance-status-ok --instance-ids "$GRAPHDB_INSTANCE_ID"
+```
+
+AWS 콘솔을 사용할 경우 `EC2 → 인스턴스 → 중지 → 작업 → 인스턴스 설정 → 사용자 데이터 편집`에서 내용을 비우고 저장한 뒤 시작. 실행 중인 인스턴스에서는 user data를 변경할 수 없음.
+
+### 3. 재시작 후 서비스 확인
+
+```bash
+cd /path/to/GraphDB-Server
+docker compose ps
+docker compose logs --since=10m neo4j
+```
+
+- Neo4j와 Promtail 컨테이너 실행 상태 확인
+- 기존 SSH 세션이 아닌 새 키로 다시 접속되는지 확인
+- 앱 서버의 `GET /health` 결과에서 Neo4j 상태가 `ok`인지 확인
+- 실제 추천 요청 한 건으로 성분·제품 조회가 정상인지 확인
+- 문제가 있으면 Terraform import를 진행하지 않고 인스턴스·컨테이너 로그와 스냅샷 복구 필요성 검토
+
+### 4. Terraform 편입 재검증
+
+아래 보안 조치 후 검증 명령으로 새 plan 생성. 검사기가 통과하면 Draft PR을 리뷰 가능 상태로 전환하고 팀 리뷰 후 머지. 머지된 main에서 plan과 state 백업을 다시 만든 뒤 사용자 apply 진행.
+
 ## 보안 조치 후 검증 명령
 
 ```bash

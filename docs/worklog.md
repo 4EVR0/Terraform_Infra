@@ -547,8 +547,17 @@
 ### 검증과 발견
 
 - 실제 AWS 계획에서 `1 to import, 0 to add, 0 to change, 0 to destroy` 확인
-- 기존 user data에 자격 정보가 포함되어 plan과 state에 노출될 수 있는 문제 발견
-- EC2 import 대상의 `user_data`가 비어 있지 않으면 실패하는 검사와 회귀 테스트 추가
-- 자격 정보 교체와 user data 삭제 후 새 계획을 검증하기 전까지 적용 중단
+- 기존 user data에 사용자 계정 생성 정보와 자격 정보가 포함되어 plan에 노출되는 문제 발견
+- AWS 변경 0건 여부와 별개로 민감 정보가 Terraform state에 저장될 수 있어 현재 plan 적용 중단
+- EC2 import 대상의 `user_data`가 비어 있지 않으면 실패하는 검사 추가
+- 보안 검사 회귀 테스트를 포함한 Python 테스트 15개 통과
+
+### 한계와 다음 작업
+
+- 실제 import는 수행하지 않았으며 기존 서버와 AWS 설정은 변경하지 않음
+- 자격 정보 교체, 불필요한 계정·키 제거, EC2 중지 후 user data 삭제 필요
+- 재시작 후 Neo4j와 추천 서비스 조회 검증, 새 import plan 검사 통과 후 편입 진행
+- GraphDB 전용 보안 그룹·IAM 편입은 EC2 편입 완료 뒤 별도 작업으로 진행
+- GraphDB-Server의 Docker Compose 구성과 앱 `/health` 동작을 확인해 사전 점검, EC2 중지·스냅샷, user data 삭제, 서비스 검증, Terraform 재검증 순서의 실행 절차 보강
 
 세부 판단과 적용 선행 조건은 [GraphDB EC2 편입](import-graphdb-ec2.md) 참조.
