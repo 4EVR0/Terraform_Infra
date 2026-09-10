@@ -46,3 +46,32 @@ class ImportPlanTests(unittest.TestCase):
         self.plan["resource_changes"] *= 2
         with self.assertRaises(ValueError):
             module.verify(self.plan, self.target, "example-instance")
+
+
+class ImportBatchTests(unittest.TestCase):
+    def setUp(self):
+        self.expected = {"aws_security_group.monitoring": "group-example", 'aws_vpc_security_group_ingress_rule.monitoring["one"]': "rule-example"}
+        self.plan = {"complete": True, "resource_changes": [
+            {"mode": "managed", "address": address, "change": {"actions": ["no-op"], "importing": {"id": identifier}}}
+            for address, identifier in self.expected.items()
+        ]}
+
+    def test_exact_batch(self):
+        module.verify_many(self.plan, self.expected)
+
+    def test_missing_or_extra_import(self):
+        with self.assertRaises(ValueError):
+            module.verify_many(self.plan, {"aws_security_group.monitoring": "group-example"})
+        self.plan["resource_changes"].pop()
+        with self.assertRaises(ValueError):
+            module.verify_many(self.plan, self.expected)
+
+    def test_existing_ec2_change_rejected(self):
+        self.plan["resource_changes"].append({"mode": "managed", "address": "aws_instance.monitoring", "change": {"actions": ["update"]}})
+        with self.assertRaises(ValueError):
+            module.verify_many(self.plan, self.expected)
+
+    def test_bad_expected_map_rejected(self):
+        for expected in [{}, [], {"a": None}, {"a": "same-id", "b": "same-id"}]:
+            with self.subTest(expected=expected), self.assertRaises(ValueError):
+                module.verify_many(self.plan, expected)
