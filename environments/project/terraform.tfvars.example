@@ -8,6 +8,9 @@
 # The IAM import additionally requires monitoring_iam, defined in
 # monitoring-iam-variables.tf. Keep the actual trust and permission policy JSON
 # in an ignored local tfvars file rather than this public example.
+# The monitoring S3 import additionally requires monitoring_s3, defined in
+# monitoring-s3-variables.tf. Keep the globally unique bucket name in ignored
+# local tfvars.
 aws_account_id = "<AWS_ACCOUNT_ID>"
 aws_region     = "ap-northeast-2"
 vpc_id         = "<VPC_ID>"
