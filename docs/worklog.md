@@ -336,3 +336,32 @@
 - Airflow UI·Scheduler·DAG와 내부 데이터는 중지 상태이므로 이번 EC2 속성 편입에서 검증하지 않음
 
 세부 범위와 적용 절차는 [Airflow EC2 편입](import-airflow-ec2.md) 참조.
+
+## 2026-09-11 — 사용자 실행으로 Airflow EC2 편입 완료
+
+### 실행과 확인 근거
+
+- PR #9 머지 후 원격 main 동기화
+- 머지된 main에서 새 import plan 생성 및 예상 주소·ID 재검사
+- 적용 전 원격 project state를 Git 제외 로컬 파일로 백업하고 JSON 유효성·파일 권한 확인
+- 사용자가 저장 plan을 적용하고 후속 plan의 `No changes` 결과 공유
+- 원격 project state 목록에서 `aws_instance.airflow` 등록을 읽기 전용으로 직접 확인
+- 기존 모니터링 EC2와 종속 자원도 state에 계속 등록되어 있음을 확인
+
+### 결과와 한계
+
+- 기존 Airflow EC2를 생성·수정·시작하지 않고 Terraform 관리 대상으로 연결
+- 코드·state·AWS의 관리 대상 속성이 일치하여 후속 변경 없음 확인
+- EC2는 기존 중지 상태이며 Airflow UI·Scheduler·DAG와 내부 데이터는 검증하지 않음
+- 연결된 보안 그룹·IAM은 아직 기존 ID·이름 참조 상태
+
+### 구현 방식 구분
+
+- HCL의 import 블록과 `aws_instance.airflow` 리소스가 실제 관리 관계 선언
+- Terraform AWS provider가 AWS를 조회하고 import 결과를 원격 state에 저장
+- Python 도구는 plan JSON의 예상 import와 변경 없음 검증에만 사용하며 AWS 자원을 관리하지 않음
+
+### 다음 작업
+
+- Airflow 전용 보안 그룹·규칙과 IAM 역할·정책 연결의 소유 범위 조사
+- 종속 자원의 변경 없는 import 계획 준비

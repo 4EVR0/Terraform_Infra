@@ -39,9 +39,21 @@
 - 실제 AWS plan: `1 to import, 0 to add, 0 to change, 0 to destroy`
 - plan JSON의 예상 주소·ID 일치와 기존 관리 자원 변경 없음 검사: 통과
 - Airflow EC2 user data 비어 있음 검사: 통과
-- 실제 import 적용: 미수행
+- 실제 import 적용 및 후속 `No changes` 확인: 완료
+- 원격 state의 `aws_instance.airflow` 등록 확인: 완료
 
 plan은 EC2 속성 일치를 확인하지만 서버 내부의 Airflow, PostgreSQL, DAG 상태나 데이터 무결성을 확인하지 않음.
+
+## 적용 결과
+
+- PR #9 머지 후 main에서 새 plan 생성
+- 적용 직전 원격 state 비공개 백업 및 JSON 유효성 확인
+- 사용자 실행으로 기존 Airflow EC2를 `aws_instance.airflow` 주소에 연결
+- 사용자 후속 plan에서 `No changes` 확인
+- 원격 state 목록에서 Airflow EC2 등록을 읽기 전용으로 확인
+- 인스턴스는 기존 중지 상태 유지
+
+이번 적용은 기존 EC2를 생성·수정·시작하지 않고 Terraform state와 관리 주소를 연결한 작업. Airflow 애플리케이션의 실행 상태를 확인한 결과는 아님.
 
 ## PR 머지 후 적용 절차
 
