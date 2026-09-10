@@ -9,7 +9,7 @@ resource "aws_instance" "monitoring" {
   force_destroy                        = var.monitoring_config.force_destroy
   get_password_data                    = var.monitoring_config.get_password_data
   hibernation                          = var.monitoring_config.hibernation
-  iam_instance_profile                 = var.monitoring_config.iam_instance_profile
+  iam_instance_profile                 = aws_iam_instance_profile.monitoring.name
   instance_initiated_shutdown_behavior = var.monitoring_config.instance_initiated_shutdown_behavior
   instance_type                        = var.monitoring_config.instance_type
   ipv6_addresses                       = var.monitoring_config.ipv6_addresses
@@ -65,5 +65,10 @@ resource "aws_instance" "monitoring" {
   }
   lifecycle {
     prevent_destroy = true
+
+    precondition {
+      condition     = var.monitoring_config.iam_instance_profile == var.monitoring_iam.instance_profile.name
+      error_message = "The reviewed monitoring instance profile must match the IAM profile being adopted."
+    }
   }
 }
