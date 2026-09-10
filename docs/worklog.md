@@ -308,3 +308,31 @@
 
 - 다음 EC2 대상과 연결 보안 그룹·IAM·스토리지의 소유 범위 조사
 - 변경 없는 편입을 계속 진행하고 버전 관리·보존 정책은 별도 운영 개선으로 분리
+
+## 2026-09-11 — Airflow EC2 편입 계획 준비
+
+### 대상 선정
+
+- GraphDB EC2는 담당자 보안 조치 이슈로 분리하고 Terraform Draft PR을 대기 상태로 유지
+- 남은 Airflow EC2와 파이프라인 테스트 EC2의 상태·의존성·프로젝트 문서상 사용 근거 비교
+- 크롤링과 데이터 파이프라인을 조율하는 메인 서버로 문서화된 Airflow EC2를 다음 대상으로 선정
+- 대상은 현재 중지 상태이며 import로 시작하지 않음
+
+### 구현과 트러블슈팅
+
+- AWS API에서 user data 존재 여부를 원문 출력 없이 먼저 확인하고 비어 있음을 확인
+- 자동 생성 코드의 네트워크 인터페이스와 일반 네트워크 속성 충돌 제거
+- IPv6 주소 수와 주소 목록 충돌을 주소 목록만 유지하는 방식으로 해결
+- 실제 속성은 Git 제외 `airflow_config` 입력으로 분리
+- 연결 보안 그룹·IAM은 기존 ID·이름 참조 유지, 루트 EBS는 EC2 블록에서만 관리
+- `prevent_destroy` 적용
+
+### 검증과 한계
+
+- 실제 plan: **1 to import, 0 to add, 0 to change, 0 to destroy**
+- 예상 import 주소·ID 일치, 기존 관리 자원 무변경, Airflow user data 비어 있음 확인
+- Terraform fmt·validate와 Python 회귀 테스트 14개 통과
+- 실제 import는 미수행. PR 머지 후 main에서 새 plan과 state 백업을 만들어 사용자 적용 필요
+- Airflow UI·Scheduler·DAG와 내부 데이터는 중지 상태이므로 이번 EC2 속성 편입에서 검증하지 않음
+
+세부 범위와 적용 절차는 [Airflow EC2 편입](import-airflow-ec2.md) 참조.
