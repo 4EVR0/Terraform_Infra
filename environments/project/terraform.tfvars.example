@@ -5,6 +5,9 @@
 # do not derive desired settings dynamically from the live instance on every plan.
 # The security group import additionally requires monitoring_security_group,
 # defined in monitoring-security-group-variables.tf, including stable rule keys.
+# The IAM import additionally requires monitoring_iam, defined in
+# monitoring-iam-variables.tf. Keep the actual trust and permission policy JSON
+# in an ignored local tfvars file rather than this public example.
 aws_account_id = "<AWS_ACCOUNT_ID>"
 aws_region     = "ap-northeast-2"
 vpc_id         = "<VPC_ID>"

@@ -72,6 +72,19 @@ class ImportBatchTests(unittest.TestCase):
             module.verify_many(self.plan, self.expected)
 
     def test_bad_expected_map_rejected(self):
-        for expected in [{}, [], {"a": None}, {"a": "same-id", "b": "same-id"}]:
+        for expected in [{}, [], {"a": None}, {"a": "id"},
+                         {"aws_example.a": "same-id", "aws_example.b": "same-id"}]:
             with self.subTest(expected=expected), self.assertRaises(ValueError):
                 module.verify_many(self.plan, expected)
+
+    def test_same_import_id_allowed_for_different_resource_types(self):
+        expected = {
+            "aws_iam_role.example": "shared-name",
+            "aws_iam_instance_profile.example": "shared-name",
+        }
+        plan = {"complete": True, "resource_changes": [
+            {"mode": "managed", "address": address,
+             "change": {"actions": ["no-op"], "importing": {"id": identifier}}}
+            for address, identifier in expected.items()
+        ]}
+        module.verify_many(plan, expected)

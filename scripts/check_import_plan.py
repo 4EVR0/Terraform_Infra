@@ -10,8 +10,15 @@ def verify_many(plan, expected):
         for address, identifier in expected.items()
     ):
         raise ValueError("Expected imports must be a nonempty address-to-ID map.")
-    if len(set(expected.values())) != len(expected):
-        raise ValueError("An existing ID must not be owned by multiple addresses.")
+    resource_ids = set()
+    for address, identifier in expected.items():
+        parts = address.split(".")
+        if len(parts) < 2:
+            raise ValueError("Expected import addresses must include a resource type and name.")
+        resource_id = (parts[-2], identifier)
+        if resource_id in resource_ids:
+            raise ValueError("An existing ID must not be owned by multiple addresses of the same resource type.")
+        resource_ids.add(resource_id)
     if plan.get("errored") or plan.get("complete") is False or plan.get("deferred_changes"):
         raise ValueError("Plan is errored, incomplete, or deferred.")
     imports = {}
