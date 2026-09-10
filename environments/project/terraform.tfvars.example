@@ -11,9 +11,12 @@
 # The monitoring S3 import additionally requires monitoring_s3, defined in
 # monitoring-s3-variables.tf. Keep the globally unique bucket name in ignored
 # local tfvars.
+# The Airflow EC2 import additionally requires airflow_config, whose full object
+# schema is defined in airflow-variables.tf. Obtain reviewed values privately.
 aws_account_id = "<AWS_ACCOUNT_ID>"
 aws_region     = "ap-northeast-2"
 vpc_id         = "<VPC_ID>"
 instance_ids = {
   monitoring = "<MONITORING_INSTANCE_ID>"
+  airflow    = "<AIRFLOW_INSTANCE_ID>"
 }
