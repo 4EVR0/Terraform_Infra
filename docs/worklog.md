@@ -149,3 +149,29 @@
 - 실제 apply는 미수행. PR 머지 후 사용자가 새 plan을 생성·검토하여 적용 예정
 
 세부 구현 선택과 절차는 [모니터링 EC2 편입](import-monitoring.md) 참조.
+
+## 2026-09-10 — 사용자 실행으로 모니터링 EC2 편입 완료
+
+- PR #1 머지 후 사용자가 main에서 새 plan 생성·백업·apply 수행
+- 사용자 보고 기준 최종 `No changes` 확인
+- 원격 project state 목록에서 `aws_instance.monitoring` 등록을 읽기 전용으로 직접 확인
+- 후속 보안 그룹 plan에서 `aws_instance.monitoring`이 import 대상 없이 `no-op`인 점을 추가 확인
+- 기존 서버 재생성·기동·설정 변경 없이 Terraform state와 관리 주소 연결
+- EC2 내부 애플리케이션·모니터링 서비스의 실행 상태를 확인한 결과는 아님
+
+## 2026-09-10 — 모니터링 보안 그룹 import 계획 준비
+
+- `feat/import-monitoring-security-group` 브랜치에서 작업
+- 프로젝트 EC2의 그룹 연결, 대상 그룹의 ENI 연결, 다른 그룹의 참조 관계를 읽기 전용으로 조사
+- 모니터링 전용 보안 그룹 1개, 인바운드 규칙 7개, 아웃바운드 규칙 1개를 개별 리소스로 정의
+- 그룹 inline 규칙과 별도 규칙 리소스를 혼용하지 않도록 구성
+- EC2가 관리되는 그룹 리소스를 참조하도록 변경하되 실제 그룹 ID 집합은 유지
+- 최초 plan의 8개 update는 기존 무태그 규칙에 빈 태그를 지정한 표현 차이로 확인
+- 무태그를 null로 반영하여 실제 변경 없이 최종 `9 to import, 0 to add, 0 to change, 0 to destroy` 확인
+- plan JSON에서 검토한 주소·ID 9개와 기존 EC2를 포함한 다른 관리 자원의 무변경 조건 확인
+- 단일 대상 검사기를 여러 import의 정확한 주소→ID 대응표 검사로 확장
+- Terraform fmt·validate, Python 회귀 테스트 13개 통과
+- 실제 import 적용은 미수행. PR 머지 후 main에서 새 plan을 생성해 사용자가 적용 예정
+- 코드 커밋: `759a150` — 모니터링 보안 그룹과 규칙 import 구성 추가
+
+세부 범위와 적용 절차는 [모니터링 보안 그룹 편입](import-monitoring-security-group.md) 참조.
