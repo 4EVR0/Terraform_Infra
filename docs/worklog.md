@@ -394,3 +394,28 @@
 - 보안 정책 적정성, Airflow 애플리케이션 통신과 인증 상태는 이번 편입에서 검증하지 않음
 
 세부 범위와 적용 절차는 [Airflow 보안 그룹 편입](import-airflow-security-group.md) 참조.
+
+## 2026-09-11 — 사용자 실행으로 Airflow 보안 그룹 편입 완료
+
+### 실행과 확인 근거
+
+- PR #11 머지 후 원격 main 동기화
+- 머지된 main에서 적용 전 원격 project state를 Git 제외 로컬 파일로 백업
+- 새 plan에서 `5 to import, 0 to add, 0 to change, 0 to destroy` 재확인
+- 예상 import 주소·ID 대응과 기존 관리 자원 무변경 검사 통과
+- 사용자가 저장 plan을 적용하고 예상 결과 확인
+- 원격 state 목록에서 Airflow 전용 보안 그룹 1개와 인바운드 규칙 3개·아웃바운드 규칙 1개 등록 확인
+- 적용 후 후속 plan에서 `No changes` 확인
+
+### 결과와 한계
+
+- 기존 통신 규칙을 생성·수정·삭제하지 않고 Terraform 관리 대상으로 연결
+- Airflow EC2가 관리 보안 그룹 리소스를 참조하며 기존 연결 그룹 집합 유지
+- 원격 state·코드·AWS의 관리 대상 속성 일치 확인
+- Airflow 서비스가 중지 상태이므로 UI·Scheduler·DAG 통신은 이번 작업에서 검증하지 않음
+- 기존 외부 접근 범위와 인증 방식은 별도 보안 개선 필요
+
+### 다음 작업
+
+- Airflow IAM 역할·인스턴스 프로파일·정책 연결의 소유 범위 조사
+- 현재 권한을 바꾸지 않는 import 계획 준비
