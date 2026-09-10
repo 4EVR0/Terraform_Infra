@@ -46,9 +46,11 @@ EC2의 `iam_instance_profile`을 기존 문자열 입력에서 `aws_iam_instance
 - 기존 EC2·보안 그룹·규칙은 모두 `no-op` 확인
 - Terraform `fmt`·`validate` 통과
 - Python 회귀 테스트 14개 통과
-- 실제 apply는 수행하지 않음
+- PR #4 머지 후 사용자가 main에서 새 plan 생성·state 백업·apply 수행
+- 사용자 실행 결과 IAM 편입 후 후속 plan에서 `No changes` 확인
+- 원격 project state를 읽기 전용으로 조회해 IAM 관리 주소 5개 등록 확인
 
-## 리뷰·머지 후 사용자 적용
+## 적용한 절차와 재현 방법
 
 1. PR 검토·머지 후 main 최신 코드 준비
 2. 실제 정책 문서와 import 기대 목록을 로컬 파일에서 재검토
@@ -64,20 +66,21 @@ python3 scripts/check_import_plan.py .local/monitoring-iam-after-merge.json \
   --expected-imports .local/monitoring-iam-expected-imports.json
 ```
 
-검토·백업 이후 사용자가 적용할 명령:
+검토·백업 이후 사용자가 적용한 명령:
 
 ```bash
 .local/bin/terraform -chdir=environments/project apply ../../.local/monitoring-iam-after-merge.tfplan
 .local/bin/terraform -chdir=environments/project plan
 ```
 
-저장 plan 적용은 확인 질문 없이 실행됨. 브랜치에서 만든 plan은 머지 후 재사용하지 않음.
+저장 plan 적용은 확인 질문 없이 실행됨. 브랜치에서 만든 plan은 머지 후 재사용하지 않음. 이번 편입에서는 머지된 main으로 새 plan을 생성해 적용함.
 
 ## 한계와 후속 작업
 
 - 기존 권한 범위의 적정성은 이번 편입에서 평가하거나 변경하지 않음. 최소 권한 조정은 실제 접근 로그와 사용 기능을 확인한 별도 PR로 진행
 - Terraform state와 plan에는 정책 본문이 저장되므로 로컬 산출물과 원격 state 접근 권한 관리 필요
 - import plan은 EC2 애플리케이션이 AWS API를 정상 호출하는지 검증하지 않음
+- 후속 `No changes`는 Terraform 관리 대상과 실제 IAM 설정의 일치를 뜻하며 애플리케이션의 AWS API 호출 성공이나 최소 권한 충족을 증명하지 않음
 - 다음 편입 후보는 모니터링 관련 S3 자원
 
 ## 공식 근거
