@@ -559,5 +559,8 @@
 - 재시작 후 Neo4j와 추천 서비스 조회 검증, 새 import plan 검사 통과 후 편입 진행
 - GraphDB 전용 보안 그룹·IAM 편입은 EC2 편입 완료 뒤 별도 작업으로 진행
 - GraphDB-Server의 Docker Compose 구성과 앱 `/health` 동작을 확인해 사전 점검, EC2 중지·스냅샷, user data 삭제, 서비스 검증, Terraform 재검증 순서의 실행 절차 보강
+- GraphDB가 다른 팀원의 운영 범위이고 확인된 HTTP 주소만으로는 EC2 SSH 관리가 불가능해 직접 변경하지 않기로 결정
+- GraphDB-Server 이슈 #5에 자격 정보 교체, user data 삭제, 재시작 후 검증 작업을 인계
+- Terraform Draft PR #8에 이슈 #5를 선행 조건으로 연결하고 완료 전 머지·apply 금지 명시
 
 세부 판단과 적용 선행 조건은 [GraphDB EC2 편입](import-graphdb-ec2.md) 참조.

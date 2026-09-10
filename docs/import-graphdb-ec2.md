@@ -148,6 +148,7 @@ python3 scripts/check_import_plan.py \
 - 공개 IP와 현재 보안 그룹 규칙의 적정성은 이번 무변경 편입에서 평가·수정하지 않음
 - 연결된 전용 보안 그룹·규칙과 IAM 역할·정책은 EC2 적용 완료 후 별도 편입
 - 자격 정보 교체와 user data 삭제에는 서비스 점검 시간과 팀 협의 필요
+- 서버 담당자의 조치 작업은 [GraphDB-Server 이슈 #5](https://github.com/4EVR0/GraphDB-Server/issues/5)에서 추적
 
 ## 참고
 
