@@ -48,7 +48,9 @@
 - 실제 AWS plan: `5 to import, 0 to add, 0 to change, 0 to destroy`
 - 예상 보안 그룹·규칙 주소와 실제 import ID 대응 검사 통과
 - 기존 Airflow EC2와 모니터링 관리 자원 변경 없음 확인
-- 실제 import 적용: 미수행
+- 사용자 실행으로 기존 보안 그룹 1개와 규칙 4개 import 완료
+- 원격 state의 관리 주소 5개 등록 확인
+- 적용 후 후속 plan에서 `No changes` 확인
 
 ## PR 머지 후 적용 순서
 
