@@ -43,9 +43,11 @@
 - 단일 import 검사기를 정확한 주소→ID 묶음 검사로 확장, 기존 단일 검사 인터페이스 유지
 - plan JSON에서 검토한 그룹/규칙 9개만 편입되고 EC2 등 다른 관리 자원의 변경이 없는지 확인
 - Python 회귀 테스트 13개 통과
-- 실제 apply는 수행하지 않음
+- PR #2 머지 후 사용자가 main에서 새 plan 생성·state 백업·apply 수행
+- 사용자 실행 결과 보안 그룹과 규칙 편입 후 후속 plan에서 `No changes` 확인
+- 원격 project state를 읽기 전용으로 조회해 보안 그룹 1개, 인바운드 규칙 7개, 아웃바운드 규칙 1개의 관리 주소 등록 확인
 
-## 리뷰·머지 후 사용자 적용
+## 적용한 절차와 재현 방법
 
 1. PR 검토·머지 후 main 최신 코드 준비
 2. 실제 `monitoring_security_group` 입력과 기존 rule key/ID 검토
@@ -61,20 +63,21 @@ python3 scripts/check_import_plan.py .local/monitoring-sg-after-merge.json \
   --expected-imports .local/monitoring-sg-expected-imports.json
 ```
 
-검토·백업 이후 사용자가 적용할 명령:
+검토·백업 이후 사용자가 적용한 명령:
 
 ```bash
 .local/bin/terraform -chdir=environments/project apply ../../.local/monitoring-sg-after-merge.tfplan
 .local/bin/terraform -chdir=environments/project plan
 ```
 
-저장 plan 적용은 확인 질문 없이 실행됨. 브랜치에서 만든 이전 plan은 머지 후 재사용하지 않음.
+저장 plan 적용은 확인 질문 없이 실행됨. 브랜치에서 만든 이전 plan은 머지 후 재사용하지 않음. 이번 편입에서는 머지된 main으로 새 plan을 생성해 적용함.
 
 ## 한계와 후속 작업
 
 - 개별 rule 방식은 Terraform에 등록하지 않은 외부 추가 규칙을 자동 삭제하는 배타적 관리 방식이 아님. 주기적 AWS 규칙 목록 대조 필요
 - 기존 공개 접근 범위가 적절한지는 별도 변경 PR에서 판단
 - 연결 인터페이스 조사와 plan은 애플리케이션 통신 성공을 검증하지 않음
+- 후속 `No changes`는 Terraform 관리 대상과 실제 AWS 설정의 일치를 뜻하며 Grafana·Prometheus·Loki의 정상 동작까지 증명하지 않음
 - 다음 편입 후보는 모니터링 IAM 역할·프로파일·정책
 
 ## 공식 근거
