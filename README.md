@@ -8,11 +8,11 @@
 - 서울 리전과 일부 글로벌 서비스의 AWS 실물 조회 완료
 - 실제 자원 목록·상태·보안 설정은 로컬 인벤토리에서 관리
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
-- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2 1대와 전용 보안 그룹·규칙 관리
+- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2 1대와 전용 보안 그룹·규칙 관리, 연결 IAM 자원 편입 준비
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
 - 운영 검증: 사용자 실행으로 동시 실행 잠금·해제 및 별도 S3 객체 버전 복구 확인
 - 완료된 편입: 사용자가 모니터링 EC2와 전용 보안 그룹·규칙 import 적용 후 각각 `No changes` 확인
-- 아직 수행하지 않은 작업: 모니터링 IAM 역할·인스턴스 프로파일·정책 편입, Terraform state 자체의 복구 후 plan 검증
+- 아직 수행하지 않은 작업: 준비한 모니터링 IAM import 적용, Terraform state 자체의 복구 후 plan 검증
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -23,6 +23,7 @@
 - 인벤토리 스크립트: AWS 조회 실행 완료, Python 문법 검사 통과
 - 모니터링 EC2 import 적용 및 이후 변경 없음 확인 완료(사용자 실행 결과)
 - 모니터링 보안 그룹·규칙 9개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
+- 모니터링 IAM 계획 검증: 역할·프로파일·인라인 정책·관리형 정책 연결 5개 import, 추가·변경·삭제 없음
 
 ## 범위
 
@@ -58,6 +59,8 @@ Terraform_Infra/
 │   ├── monitoring-variables.tf # 비공개 설정의 입력 타입
 │   ├── monitoring-security-group.tf # 전용 보안 그룹과 규칙 관리
 │   ├── monitoring-security-group-variables.tf # 비공개 규칙 입력 타입
+│   ├── monitoring-iam.tf     # 연결 IAM 자원과 import 선언
+│   ├── monitoring-iam-variables.tf # 비공개 정책 입력 타입
 │   ├── backend.tf.example     # 원격 상태 저장 설정, 현재 비활성
 │   └── backend.tfbackend.example
 ├── inventory/raw/              # 로컬 전용 원본 응답, Git 제외
@@ -90,7 +93,7 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 .local/bin/terraform -chdir=environments/project plan
 ```
 
-- 현재 원격 state에는 모니터링 EC2와 전용 보안 그룹·규칙이 등록되어 있으며 후속 plan은 `No changes`
+- 현재 작업 브랜치의 plan은 모니터링 IAM 자원 5개 import만 제안. 기존 EC2·보안 그룹·규칙은 모두 `no-op`
 - 새 checkout은 실제 버킷·key·계정 제한이 담긴 로컬 `.tfbackend` 파일을 비공개로 준비한 뒤 초기화
 - `.example` 파일은 Terraform이 읽지 않는 검토용 파일
 - provider의 `allowed_account_ids`로 다른 계정에 대한 실행 방지
@@ -106,7 +109,7 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. 모니터링 IAM 역할·인스턴스 프로파일·정책 편입
+1. 모니터링 IAM import PR 검토·머지 후 새 plan으로 사용자 적용
 2. 모니터링 관련 S3 자원 편입
 3. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
 4. 나머지 EC2와 종속 자원 편입
@@ -121,3 +124,5 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 첫 편입의 범위와 사용자 적용 절차는 [모니터링 EC2 import](docs/import-monitoring.md) 참조. 앞으로 작업 브랜치 → PR → 리뷰·머지 → 새 plan 검토 → 사용자 apply 순서로 진행.
 
 모니터링 보안 그룹의 편입 범위, 적용 결과와 한계는 [모니터링 보안 그룹 import](docs/import-monitoring-security-group.md) 참조.
+
+모니터링 IAM의 관리 경계, 정책 보관 방식과 적용 절차는 [모니터링 IAM import](docs/import-monitoring-iam.md) 참조.
