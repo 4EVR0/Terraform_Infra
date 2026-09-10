@@ -8,11 +8,12 @@
 - 서울 리전과 일부 글로벌 서비스의 AWS 실물 조회 완료
 - 실제 자원 목록·상태·보안 설정은 로컬 인벤토리에서 관리
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
-- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2 1대와 전용 보안 그룹·규칙·IAM 연결·S3 관리
+- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2와 종속 자원 관리, Airflow EC2 편입 준비
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
 - 운영 검증: 사용자 실행으로 동시 실행 잠금·해제 및 별도 S3 객체 버전 복구 확인
 - 완료된 편입: 사용자가 모니터링 EC2, 전용 보안 그룹·규칙, 연결 IAM 자원·S3 import 적용 후 각각 `No changes` 확인
-- 아직 수행하지 않은 작업: 나머지 EC2와 종속 자원 편입, Terraform state 자체의 복구 후 plan 검증
+- Airflow EC2: user data가 비어 있고 `1 import, 0 add/change/destroy`인 계획 확인
+- 아직 수행하지 않은 작업: Airflow EC2 실제 편입, 나머지 EC2와 종속 자원 편입, Terraform state 자체의 복구 후 plan 검증
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -25,6 +26,7 @@
 - 모니터링 보안 그룹·규칙 9개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - 모니터링 IAM 5개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - 모니터링 S3 4개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
+- Airflow EC2 import 계획의 주소·ID·무변경·빈 user data 검사 통과
 
 ## 범위
 
@@ -64,6 +66,8 @@ Terraform_Infra/
 │   ├── monitoring-iam-variables.tf # 비공개 정책 입력 타입
 │   ├── monitoring-s3.tf      # 모니터링 버킷과 보호 설정 관리
 │   ├── monitoring-s3-variables.tf # 비공개 버킷 입력 타입
+│   ├── airflow.tf           # Airflow EC2 import와 검토한 속성 관리
+│   ├── airflow-variables.tf # Airflow 비공개 설정의 입력 타입
 │   ├── backend.tf.example     # 원격 상태 저장 설정, 현재 비활성
 │   └── backend.tfbackend.example
 ├── inventory/raw/              # 로컬 전용 원본 응답, Git 제외
@@ -112,11 +116,12 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. 다음 EC2 대상과 연결 보안 그룹·IAM·스토리지의 소유 범위 확정
-2. 나머지 EC2와 종속 자원의 변경 없는 편입
-3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
-4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
-5. 팀 접근 권한 구성 및 Terraform state 복구 후 plan 검증
+1. Airflow EC2 PR 머지 후 새 plan·state 백업·사용자 import 적용
+2. Airflow 전용 보안 그룹·IAM 관리 경계 확정 및 변경 없는 편입
+3. 나머지 EC2와 종속 자원의 변경 없는 편입
+4. 버전 관리·보존 정책을 별도 운영 변경으로 설계
+5. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
+6. 팀 접근 권한 구성 및 Terraform state 복구 후 plan 검증
 
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
 
@@ -131,3 +136,5 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 모니터링 IAM의 관리 경계, 정책 보관 방식과 적용 절차는 [모니터링 IAM import](docs/import-monitoring-iam.md) 참조.
 
 모니터링 S3의 편입 범위, 데이터 보호 선택과 적용 절차는 [모니터링 S3 import](docs/import-monitoring-s3.md) 참조.
+
+Airflow EC2의 대상 선정, 관리 범위와 적용 절차는 [Airflow EC2 import](docs/import-airflow-ec2.md) 참조.
