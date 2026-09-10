@@ -14,7 +14,9 @@ class ImportPlanTests(unittest.TestCase):
         self.plan = {"complete": True, "resource_changes": [{
             "mode": "managed", "address": self.target,
             "change": {"actions": ["no-op"], "importing": {"id": "example-instance"}},
-        }]}
+        }], "planned_values": {"root_module": {"resources": [{
+            "address": self.target, "values": {"user_data": None},
+        }]}}}
 
     def test_expected_import(self):
         module.verify(self.plan, self.target, "example-instance")
@@ -45,6 +47,11 @@ class ImportPlanTests(unittest.TestCase):
                 module.verify(plan, self.target, "example-instance")
         self.plan["resource_changes"] *= 2
         with self.assertRaises(ValueError):
+            module.verify(self.plan, self.target, "example-instance")
+
+    def test_nonempty_ec2_user_data_rejected(self):
+        self.plan["planned_values"]["root_module"]["resources"][0]["values"]["user_data"] = "secret bootstrap"
+        with self.assertRaisesRegex(ValueError, "nonempty user_data"):
             module.verify(self.plan, self.target, "example-instance")
 
 
