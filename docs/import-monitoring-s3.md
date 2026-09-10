@@ -32,9 +32,11 @@
 - 기존 EC2·보안 그룹·규칙·IAM 자원 15개는 모두 `no-op` 확인
 - Terraform `fmt`·`validate` 통과
 - Python 회귀 테스트 14개 통과
-- 실제 apply는 수행하지 않음
+- PR #6 머지 후 사용자가 main에서 새 plan 생성·state 백업·apply 수행
+- 사용자 실행 결과 S3 편입 후 후속 plan에서 `No changes` 확인
+- 원격 project state를 읽기 전용으로 조회해 S3 관리 주소 4개 등록 확인
 
-## 리뷰·머지 후 사용자 적용
+## 적용한 절차와 재현 방법
 
 1. PR 검토·머지 후 main 최신 코드 준비
 2. 버킷 이름과 기대 import 목록을 로컬 파일에서 재검토
@@ -50,18 +52,19 @@ python3 scripts/check_import_plan.py .local/monitoring-s3-after-merge.json \
   --expected-imports .local/monitoring-s3-expected-imports.json
 ```
 
-검토·백업 이후 사용자가 적용할 명령:
+검토·백업 이후 사용자가 적용한 명령:
 
 ```bash
 .local/bin/terraform -chdir=environments/project apply ../../.local/monitoring-s3-after-merge.tfplan
 .local/bin/terraform -chdir=environments/project plan
 ```
 
-저장 plan 적용은 확인 질문 없이 실행됨. 브랜치에서 만든 plan은 머지 후 재사용하지 않음.
+저장 plan 적용은 확인 질문 없이 실행됨. 브랜치에서 만든 plan은 머지 후 재사용하지 않음. 이번 편입에서는 머지된 main으로 새 plan을 생성해 적용함.
 
 ## 한계와 후속 작업
 
 - import와 후속 plan은 Loki의 실제 S3 읽기·쓰기 성공을 검증하지 않음
+- 후속 `No changes`는 Terraform 관리 대상과 실제 S3 설정의 일치를 뜻하며 Loki의 정상 동작이나 기존 객체의 복구 가능성을 증명하지 않음
 - 서버 측 암호화 설정 편입은 기존 객체를 다시 암호화하거나 내용을 검사하는 작업이 아님
 - 버전 관리와 수명 주기의 도입 여부는 객체 삭제 복구와 보존 비용 요구를 바탕으로 별도 설계 필요
 - 개별 설정 리소스에 포함하지 않은 외부 설정은 주기적인 AWS 설정 목록 대조 필요

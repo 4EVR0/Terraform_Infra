@@ -3,16 +3,16 @@
 프로젝트에서 사용하는 AWS 인프라 전체를 코드로 관리하기 위한 작업 공간.
 첫 목표는 **기존 자원의 재생성 없이 Terraform 관리 대상으로 편입**. 이후 변경 이력 관리와 장애 복구 검증으로 확장.
 
-## 현재 상태 — 2026-09-10
+## 현재 상태 — 2026-09-11
 
 - 서울 리전과 일부 글로벌 서비스의 AWS 실물 조회 완료
 - 실제 자원 목록·상태·보안 설정은 로컬 인벤토리에서 관리
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
-- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2 1대와 전용 보안 그룹·규칙·IAM 연결 관리, 모니터링 S3 편입 준비
+- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2 1대와 전용 보안 그룹·규칙·IAM 연결·S3 관리
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
 - 운영 검증: 사용자 실행으로 동시 실행 잠금·해제 및 별도 S3 객체 버전 복구 확인
-- 완료된 편입: 사용자가 모니터링 EC2, 전용 보안 그룹·규칙, 연결 IAM 자원 import 적용 후 각각 `No changes` 확인
-- 아직 수행하지 않은 작업: 준비한 모니터링 S3 import 적용, Terraform state 자체의 복구 후 plan 검증
+- 완료된 편입: 사용자가 모니터링 EC2, 전용 보안 그룹·규칙, 연결 IAM 자원·S3 import 적용 후 각각 `No changes` 확인
+- 아직 수행하지 않은 작업: 나머지 EC2와 종속 자원 편입, Terraform state 자체의 복구 후 plan 검증
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -24,7 +24,7 @@
 - 모니터링 EC2 import 적용 및 이후 변경 없음 확인 완료(사용자 실행 결과)
 - 모니터링 보안 그룹·규칙 9개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - 모니터링 IAM 5개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
-- 모니터링 S3 계획 검증: 버킷과 보호 설정 4개 import, 추가·변경·삭제 없음
+- 모니터링 S3 4개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 
 ## 범위
 
@@ -96,7 +96,7 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 .local/bin/terraform -chdir=environments/project plan
 ```
 
-- 현재 작업 브랜치의 plan은 모니터링 S3 자원 4개 import만 제안. 기존 관리 자원 15개는 모두 `no-op`
+- 현재 원격 state에는 모니터링 EC2와 종속 보안 그룹·IAM·S3 자원이 등록되어 있으며 후속 plan은 `No changes`
 - 새 checkout은 실제 버킷·key·계정 제한이 담긴 로컬 `.tfbackend` 파일을 비공개로 준비한 뒤 초기화
 - `.example` 파일은 Terraform이 읽지 않는 검토용 파일
 - provider의 `allowed_account_ids`로 다른 계정에 대한 실행 방지
@@ -112,10 +112,10 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. 모니터링 S3 import PR 검토·머지 후 새 plan으로 사용자 적용
-2. 버전 관리·보존 정책을 별도 변경으로 설계
-3. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
-4. 나머지 EC2와 종속 자원 편입
+1. 다음 EC2 대상과 연결 보안 그룹·IAM·스토리지의 소유 범위 확정
+2. 나머지 EC2와 종속 자원의 변경 없는 편입
+3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
+4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
 5. 팀 접근 권한 구성 및 Terraform state 복구 후 plan 검증
 
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
