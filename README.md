@@ -8,7 +8,7 @@
 - 서울 리전과 일부 글로벌 서비스의 AWS 실물 조회 완료
 - 실제 자원 목록·상태·보안 설정은 로컬 인벤토리에서 관리
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
-- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2와 종속 자원, Airflow EC2·전용 보안 그룹·IAM 관리
+- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2와 종속 자원, Airflow EC2·전용 보안 그룹·IAM 관리, GraphDB EC2 편입 준비
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
 - 운영 검증: 사용자 실행으로 동시 실행 잠금·해제, 별도 S3 객체 버전 복구, 격리된 Terraform state 복원 후 plan 확인
 - 완료된 편입: 사용자가 모니터링 EC2, 전용 보안 그룹·규칙, 연결 IAM 자원·S3 import 적용 후 각각 `No changes` 확인
@@ -31,6 +31,7 @@
 - Airflow EC2 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - Airflow 전용 보안 그룹 1개와 규칙 4개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - Airflow IAM 역할·인스턴스 프로파일·관리형 정책 연결 7개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
+- GraphDB EC2: 기존 user data의 자격 정보 노출 위험으로 적용을 차단하고 보안 조치 후 재검증하도록 분리
 
 ## 범위
 
@@ -76,6 +77,8 @@ Terraform_Infra/
 │   ├── airflow-security-group-variables.tf # 비공개 규칙 입력 타입
 │   ├── airflow-iam.tf      # Airflow IAM 역할·프로파일·정책 연결 관리
 │   ├── airflow-iam-variables.tf # 비공개 IAM 설정의 입력 타입
+│   ├── graphdb.tf          # GraphDB EC2 import와 검토한 속성 관리
+│   ├── graphdb-variables.tf # GraphDB 비공개 설정의 입력 타입
 │   ├── backend.tf.example     # 원격 상태 저장 설정, 현재 비활성
 │   └── backend.tfbackend.example
 ├── inventory/raw/              # 로컬 전용 원본 응답, Git 제외
@@ -151,3 +154,5 @@ Airflow 전용 보안 그룹의 소유 경계, 규칙 관리 방식과 적용 �
 Airflow IAM의 소유 경계, 정책 연결 관리 방식과 적용 절차는 [Airflow IAM import](docs/import-airflow-iam.md) 참조.
 
 논문 크롤링 EC2의 편입 보류 근거와 재사용 시 권장 구조는 [논문 크롤링 EC2 관리 판단](docs/assess-pipeline-ec2.md) 참조.
+
+GraphDB EC2의 편입 준비, 발견된 user data 위험과 적용 선행 조건은 [GraphDB EC2 편입](docs/import-graphdb-ec2.md) 참조.

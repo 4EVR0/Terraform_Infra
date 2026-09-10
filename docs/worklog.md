@@ -533,3 +533,22 @@
 - 팀 로그인 방식과 최소 권한 정책 확정 후 팀원별 상태 읽기·잠금·plan 검증 필요
 
 단계별 의미와 실제 장애 적용 순서는 [Terraform 상태 복구 검증](verify-state-recovery.md) 참조.
+
+## 2026-09-11 — GraphDB EC2 편입 준비와 보안 게이트
+
+### 대상 선정과 구현
+
+- 실행 중인 핵심 데이터 서비스인 GraphDB를 편입 대상으로 선정
+- 자동 생성 구성에서 네트워크 인터페이스·IPv6 상충 속성과 계산값 정리
+- 실제 EC2 설정은 Git 제외 `graphdb_config` 입력으로 분리
+- 보안 그룹·IAM은 현재 ID·이름 참조를 유지하고 루트 EBS는 EC2 블록에서만 관리
+- `prevent_destroy` 적용, 기존 user data는 공개 코드와 tfvars에 복사하지 않도록 제외
+
+### 검증과 발견
+
+- 실제 AWS 계획에서 `1 to import, 0 to add, 0 to change, 0 to destroy` 확인
+- 기존 user data에 자격 정보가 포함되어 plan과 state에 노출될 수 있는 문제 발견
+- EC2 import 대상의 `user_data`가 비어 있지 않으면 실패하는 검사와 회귀 테스트 추가
+- 자격 정보 교체와 user data 삭제 후 새 계획을 검증하기 전까지 적용 중단
+
+세부 판단과 적용 선행 조건은 [GraphDB EC2 편입](import-graphdb-ec2.md) 참조.
