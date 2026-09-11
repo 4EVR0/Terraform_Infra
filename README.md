@@ -10,12 +10,12 @@
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
 - 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2와 종속 자원, Airflow EC2·전용 보안 그룹·IAM 관리
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
-- 운영 검증: 사용자 실행으로 동시 실행 잠금·해제 및 별도 S3 객체 버전 복구 확인
+- 운영 검증: 사용자 실행으로 동시 실행 잠금·해제, 별도 S3 객체 버전 복구, 격리된 Terraform state 복원 후 plan 확인
 - 완료된 편입: 사용자가 모니터링 EC2, 전용 보안 그룹·규칙, 연결 IAM 자원·S3 import 적용 후 각각 `No changes` 확인
 - 완료된 EC2 편입: 모니터링과 Airflow. 사용자가 각각 적용 후 `No changes` 확인
 - 완료된 Airflow 종속 자원 편입: 전용 보안 그룹 1개·규칙 4개와 IAM 자원 7개. 원격 state 등록 및 `No changes` 확인
 - 논문 크롤링 EC2: 장시간 크롤링을 위해 만든 임시 실행 서버로 확인. 재사용 여부 결정과 내부 데이터 확인 전 기존 서버 편입 보류
-- 아직 수행하지 않은 작업: 나머지 EC2·종속 자원 편입, Terraform state 자체의 복구 후 plan 검증
+- 아직 수행하지 않은 작업: 나머지 EC2·종속 자원 편입, 팀원별 상태 접근 검증
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -124,18 +124,17 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. 논문 크롤링 EC2의 보존 데이터와 재사용 필요성 확인
-2. Terraform state 복구 후 plan 검증
-3. 나머지 EC2와 종속 자원의 변경 없는 편입
-4. 버전 관리·보존 정책을 별도 운영 변경으로 설계
-5. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
-6. 팀 접근 권한 구성
+1. GraphDB 서버 보안 조치 완료 확인 후 변경 없는 편입 재개
+2. 나머지 EC2와 종속 자원의 변경 없는 편입
+3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
+4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
+5. 팀 접근 권한 구성 및 팀원별 상태 접근 검증
 
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
 
 작업 이력은 [작업 기록](docs/worklog.md), 인벤토리 도구의 범위와 한계는 [조사 절차](docs/discovery-workflow.md) 참조.
 
-공용 상태 저장소 구성은 `bootstrap/state/`, 설계와 적용 순서는 [상태 저장소 설계](docs/state-backend.md) 참조. 사용자 실행으로 버킷 생성 및 두 상태 객체 저장 확인. 동시 실행 잠금 및 별도 S3 객체 버전 복구 확인. Terraform state 자체의 복원 후 plan 검증은 미수행.
+공용 상태 저장소 구성은 `bootstrap/state/`, 설계와 적용 순서는 [상태 저장소 설계](docs/state-backend.md) 참조. 사용자 실행으로 버킷 생성 및 두 상태 객체 저장 확인. 동시 실행 잠금, 별도 S3 객체 버전 복구와 격리된 Terraform state 복원 후 plan 검증 완료. 상세 시험은 [Terraform 상태 복구 검증](docs/verify-state-recovery.md) 참조.
 
 첫 편입의 범위와 사용자 적용 절차는 [모니터링 EC2 import](docs/import-monitoring.md) 참조. 앞으로 작업 브랜치 → PR → 리뷰·머지 → 새 plan 검토 → 사용자 apply 순서로 진행.
 
