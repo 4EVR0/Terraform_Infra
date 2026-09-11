@@ -15,7 +15,7 @@ resource "aws_instance" "airflow" {
   force_destroy                        = var.airflow_config.force_destroy
   get_password_data                    = var.airflow_config.get_password_data
   hibernation                          = var.airflow_config.hibernation
-  iam_instance_profile                 = var.airflow_config.iam_instance_profile
+  iam_instance_profile                 = aws_iam_instance_profile.airflow.name
   instance_initiated_shutdown_behavior = var.airflow_config.instance_initiated_shutdown_behavior
   instance_type                        = var.airflow_config.instance_type
   ipv6_addresses                       = var.airflow_config.ipv6_addresses
@@ -80,5 +80,10 @@ resource "aws_instance" "airflow" {
 
   lifecycle {
     prevent_destroy = true
+
+    precondition {
+      condition     = var.airflow_config.iam_instance_profile == var.airflow_iam.instance_profile.name
+      error_message = "The reviewed Airflow instance profile must match the IAM profile being adopted."
+    }
   }
 }
