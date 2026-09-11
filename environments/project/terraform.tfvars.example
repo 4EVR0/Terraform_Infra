@@ -15,6 +15,9 @@
 # schema is defined in airflow-variables.tf. Obtain reviewed values privately.
 # The Airflow security group import additionally requires airflow_security_group,
 # defined in airflow-security-group-variables.tf, including stable rule keys.
+# The Airflow IAM import additionally requires airflow_iam, defined in
+# airflow-iam-variables.tf. Keep the actual trust policy and policy ARNs in an
+# ignored local tfvars file.
 aws_account_id = "<AWS_ACCOUNT_ID>"
 aws_region     = "ap-northeast-2"
 vpc_id         = "<VPC_ID>"
