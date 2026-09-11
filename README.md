@@ -14,6 +14,7 @@
 - 완료된 편입: 사용자가 모니터링 EC2, 전용 보안 그룹·규칙, 연결 IAM 자원·S3 import 적용 후 각각 `No changes` 확인
 - 완료된 EC2 편입: 모니터링과 Airflow. 사용자가 각각 적용 후 `No changes` 확인
 - 완료된 Airflow 종속 자원 편입: 전용 보안 그룹 1개·규칙 4개와 IAM 자원 7개. 원격 state 등록 및 `No changes` 확인
+- 논문 크롤링 EC2: 장시간 크롤링을 위해 만든 임시 실행 서버로 확인. 재사용 여부 결정과 내부 데이터 확인 전 기존 서버 편입 보류
 - 아직 수행하지 않은 작업: 나머지 EC2·종속 자원 편입, Terraform state 자체의 복구 후 plan 검증
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
@@ -123,11 +124,12 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. 파이프라인 테스트 EC2의 현재 사용 여부와 소유 범위 확인 후 편입 여부 결정
-2. 나머지 EC2와 종속 자원의 변경 없는 편입
-3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
-4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
-5. 팀 접근 권한 구성 및 Terraform state 복구 후 plan 검증
+1. 논문 크롤링 EC2의 보존 데이터와 재사용 필요성 확인
+2. Terraform state 복구 후 plan 검증
+3. 나머지 EC2와 종속 자원의 변경 없는 편입
+4. 버전 관리·보존 정책을 별도 운영 변경으로 설계
+5. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
+6. 팀 접근 권한 구성
 
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
 
@@ -148,3 +150,5 @@ Airflow EC2의 대상 선정, 관리 범위와 적용 절차는 [Airflow EC2 imp
 Airflow 전용 보안 그룹의 소유 경계, 규칙 관리 방식과 적용 절차는 [Airflow 보안 그룹 import](docs/import-airflow-security-group.md) 참조.
 
 Airflow IAM의 소유 경계, 정책 연결 관리 방식과 적용 절차는 [Airflow IAM import](docs/import-airflow-iam.md) 참조.
+
+논문 크롤링 EC2의 편입 보류 근거와 재사용 시 권장 구조는 [논문 크롤링 EC2 관리 판단](docs/assess-pipeline-ec2.md) 참조.
