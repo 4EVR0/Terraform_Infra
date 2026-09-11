@@ -564,3 +564,37 @@
 - Terraform Draft PR #8에 이슈 #5를 선행 조건으로 연결하고 완료 전 머지·apply 금지 명시
 
 세부 판단과 적용 선행 조건은 [GraphDB EC2 편입](import-graphdb-ec2.md) 참조.
+
+## 2026-09-12 — GraphDB 보안 조치와 import 재검증
+
+### 문제와 대응
+
+- 최초 import 계획에서 EC2 user data의 자격 정보가 Terraform plan과 state에 저장될 수 있어 적용 차단
+- 공개 저장소의 적재 스크립트에서도 기존 Neo4j 비밀번호를 로그에 출력하는 문제 확인
+- 새 임의 비밀번호로 Neo4j 사용자, 서버·로컬 환경 파일과 GitHub Actions secret 갱신
+- 서버 환경 파일 권한을 `600`으로 제한하고 적재 로그의 비밀번호 출력 제거
+- SSH 비밀번호 로그인을 끄고 사용자 홈의 개인키 두 개를 root 전용 위치로 격리
+- 공개키가 등록된 팀 계정의 기존 로컬 비밀번호 잠금
+
+### 중단 작업과 복구 근거
+
+- Neo4j와 Promtail을 정상 종료한 뒤 EC2 중지
+- 중지된 루트 볼륨의 EBS 스냅샷 생성 완료
+- EC2 user data를 12,184바이트에서 0바이트로 변경
+- EC2 재시작 후 시스템 상태 검사, 공개키 SSH 설정, Neo4j와 Promtail 실행 확인
+- 추천 서버 설정으로 GraphDB 인증과 읽기 쿼리 수행
+- 재시작 전후 그래프 노드·관계 수 일치 확인
+
+### Terraform 재검증
+
+- 오래된 GraphDB 브랜치를 최신 main에 rebase하며 Airflow·상태 복구 문서와 구성 통합
+- `terraform fmt -check -recursive`, `terraform validate`, Python 회귀 테스트 15개 통과
+- 새 실제 계획: **1 to import, 0 to add, 0 to change, 0 to destroy**
+- 계획 검사기에서 GraphDB EC2의 빈 user data, 정확한 import 주소·ID와 기존 관리 자원 무변경 확인
+- 실제 import는 PR 머지 후 main에서 새 계획과 state 백업을 만든 뒤 사용자 적용 예정
+
+### 한계와 다음 작업
+
+- 복구 스냅샷은 기존 루트 볼륨과 같이 암호화되지 않음
+- 관리자 공개키 접속은 검증했으나 팀원별 사용자 계정의 공개키 접속은 각 장비에서 추가 확인 필요
+- GraphDB EC2 편입 후 전용 보안 그룹·규칙과 IAM 역할·프로파일·정책 연결을 별도 편입

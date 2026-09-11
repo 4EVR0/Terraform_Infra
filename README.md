@@ -31,7 +31,8 @@
 - Airflow EC2 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - Airflow 전용 보안 그룹 1개와 규칙 4개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - Airflow IAM 역할·인스턴스 프로파일·관리형 정책 연결 7개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
-- GraphDB EC2: 기존 user data의 자격 정보 노출 위험으로 적용을 차단하고 보안 조치 후 재검증하도록 분리
+- GraphDB EC2 보안 조치 후 새 계획에서 `1 to import, 0 to add, 0 to change, 0 to destroy`와 빈 user data 확인
+- GraphDB EC2: 자격 정보 교체와 user data 제거 후 새 계획에서 import 1건 외 변경 없음 및 보안 검사 통과
 
 ## 범위
 
@@ -127,7 +128,7 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. GraphDB 서버 보안 조치 완료 확인 후 변경 없는 편입 재개
+1. GraphDB 편입 PR 머지 후 main에서 새 계획·state 백업·사용자 적용
 2. 나머지 EC2와 종속 자원의 변경 없는 편입
 3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
 4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
