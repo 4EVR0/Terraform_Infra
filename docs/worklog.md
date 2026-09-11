@@ -419,3 +419,32 @@
 
 - Airflow IAM 역할·인스턴스 프로파일·정책 연결의 소유 범위 조사
 - 현재 권한을 바꾸지 않는 import 계획 준비
+
+## 2026-09-11 — Airflow IAM import 계획 준비
+
+### 범위 조사
+
+- Airflow EC2에 연결된 인스턴스 프로파일과 IAM 역할을 AWS에서 읽기 전용으로 재조회
+- 역할과 프로파일이 1:1로 연결되고 해당 프로파일을 사용하는 EC2가 Airflow 서버 한 대뿐임을 확인
+- 인라인 정책 없이 AWS 관리형 정책 연결 5개로 권한이 구성됨을 확인
+- 역할 1개, 인스턴스 프로파일 1개, 관리형 정책 연결 5개를 편입 대상으로 선정
+
+### 구현과 판단
+
+- IAM 역할·인스턴스 프로파일·관리형 정책 연결을 독립 Terraform 리소스로 정의
+- Airflow EC2의 프로파일 입력을 관리 리소스 참조로 전환하고 기존 값 일치 precondition 추가
+- 실제 이름·ARN·신뢰 정책을 Git 제외 로컬 tfvars로 분리
+- 정책 연결을 개별 관리해 최초 편입 중 의도하지 않은 권한 회수 방지
+- 모든 편입 자원에 `prevent_destroy` 적용
+- 신뢰 정책 JSON 유효성 검사와 관리형 정책 ARN 중복 입력 차단
+
+### 검증과 한계
+
+- 실제 plan: **7 to import, 0 to add, 0 to change, 0 to destroy**
+- 예상 IAM 주소·ID 대응과 기존 관리 자원 무변경 검사 통과
+- Terraform fmt·validate와 Python 회귀 테스트 14개 통과
+- 구현 커밋: `51152d4` — Airflow IAM 자원 import 구성 추가
+- 현재 관리형 정책의 최소 권한 충족 여부와 Airflow의 AWS API 호출 성공은 미검증
+- 실제 사용 기록을 근거로 한 권한 축소는 별도 운영 변경으로 진행 필요
+
+세부 관리 경계와 적용 절차는 [Airflow IAM 편입](import-airflow-iam.md) 참조.
