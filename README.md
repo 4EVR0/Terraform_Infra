@@ -8,7 +8,7 @@
 - 서울 리전과 일부 글로벌 서비스의 AWS 실물 조회 완료
 - 실제 자원 목록·상태·보안 설정은 로컬 인벤토리에서 관리
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
-- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2와 종속 자원, Airflow EC2·전용 보안 그룹·IAM 관리
+- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2와 종속 자원, Airflow EC2·전용 보안 그룹·IAM 관리, GraphDB EC2 편입 준비
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
 - 운영 검증: 사용자 실행으로 동시 실행 잠금·해제, 별도 S3 객체 버전 복구, 격리된 Terraform state 복원 후 plan 확인
 - 완료된 편입: 사용자가 모니터링 EC2, 전용 보안 그룹·규칙, 연결 IAM 자원·S3 import 적용 후 각각 `No changes` 확인
@@ -31,6 +31,8 @@
 - Airflow EC2 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - Airflow 전용 보안 그룹 1개와 규칙 4개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - Airflow IAM 역할·인스턴스 프로파일·관리형 정책 연결 7개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
+- GraphDB EC2 보안 조치 후 새 계획에서 `1 to import, 0 to add, 0 to change, 0 to destroy`와 빈 user data 확인
+- GraphDB EC2: 자격 정보 교체와 user data 제거 후 새 계획에서 import 1건 외 변경 없음 및 보안 검사 통과
 
 ## 범위
 
@@ -76,6 +78,8 @@ Terraform_Infra/
 │   ├── airflow-security-group-variables.tf # 비공개 규칙 입력 타입
 │   ├── airflow-iam.tf      # Airflow IAM 역할·프로파일·정책 연결 관리
 │   ├── airflow-iam-variables.tf # 비공개 IAM 설정의 입력 타입
+│   ├── graphdb.tf          # GraphDB EC2 import와 검토한 속성 관리
+│   ├── graphdb-variables.tf # GraphDB 비공개 설정의 입력 타입
 │   ├── backend.tf.example     # 원격 상태 저장 설정, 현재 비활성
 │   └── backend.tfbackend.example
 ├── inventory/raw/              # 로컬 전용 원본 응답, Git 제외
@@ -124,7 +128,7 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. GraphDB 서버 보안 조치 완료 확인 후 변경 없는 편입 재개
+1. GraphDB 편입 PR 머지 후 main에서 새 계획·state 백업·사용자 적용
 2. 나머지 EC2와 종속 자원의 변경 없는 편입
 3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
 4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
@@ -151,3 +155,5 @@ Airflow 전용 보안 그룹의 소유 경계, 규칙 관리 방식과 적용 �
 Airflow IAM의 소유 경계, 정책 연결 관리 방식과 적용 절차는 [Airflow IAM import](docs/import-airflow-iam.md) 참조.
 
 논문 크롤링 EC2의 편입 보류 근거와 재사용 시 권장 구조는 [논문 크롤링 EC2 관리 판단](docs/assess-pipeline-ec2.md) 참조.
+
+GraphDB EC2의 편입 준비, 발견된 user data 위험과 적용 선행 조건은 [GraphDB EC2 편입](docs/import-graphdb-ec2.md) 참조.

@@ -533,3 +533,68 @@
 - 팀 로그인 방식과 최소 권한 정책 확정 후 팀원별 상태 읽기·잠금·plan 검증 필요
 
 단계별 의미와 실제 장애 적용 순서는 [Terraform 상태 복구 검증](verify-state-recovery.md) 참조.
+
+## 2026-09-11 — GraphDB EC2 편입 준비와 보안 게이트
+
+### 대상 선정과 구현
+
+- 실행 중인 핵심 데이터 서비스인 GraphDB를 편입 대상으로 선정
+- 자동 생성 구성에서 네트워크 인터페이스·IPv6 상충 속성과 계산값 정리
+- 실제 EC2 설정은 Git 제외 `graphdb_config` 입력으로 분리
+- 보안 그룹·IAM은 현재 ID·이름 참조를 유지하고 루트 EBS는 EC2 블록에서만 관리
+- `prevent_destroy` 적용, 기존 user data는 공개 코드와 tfvars에 복사하지 않도록 제외
+
+### 검증과 발견
+
+- 실제 AWS 계획에서 `1 to import, 0 to add, 0 to change, 0 to destroy` 확인
+- 기존 user data에 사용자 계정 생성 정보와 자격 정보가 포함되어 plan에 노출되는 문제 발견
+- AWS 변경 0건 여부와 별개로 민감 정보가 Terraform state에 저장될 수 있어 현재 plan 적용 중단
+- EC2 import 대상의 `user_data`가 비어 있지 않으면 실패하는 검사 추가
+- 보안 검사 회귀 테스트를 포함한 Python 테스트 15개 통과
+
+### 한계와 다음 작업
+
+- 실제 import는 수행하지 않았으며 기존 서버와 AWS 설정은 변경하지 않음
+- 자격 정보 교체, 불필요한 계정·키 제거, EC2 중지 후 user data 삭제 필요
+- 재시작 후 Neo4j와 추천 서비스 조회 검증, 새 import plan 검사 통과 후 편입 진행
+- GraphDB 전용 보안 그룹·IAM 편입은 EC2 편입 완료 뒤 별도 작업으로 진행
+- GraphDB-Server의 Docker Compose 구성과 앱 `/health` 동작을 확인해 사전 점검, EC2 중지·스냅샷, user data 삭제, 서비스 검증, Terraform 재검증 순서의 실행 절차 보강
+- GraphDB가 다른 팀원의 운영 범위이고 확인된 HTTP 주소만으로는 EC2 SSH 관리가 불가능해 직접 변경하지 않기로 결정
+- GraphDB-Server 이슈 #5에 자격 정보 교체, user data 삭제, 재시작 후 검증 작업을 인계
+- Terraform Draft PR #8에 이슈 #5를 선행 조건으로 연결하고 완료 전 머지·apply 금지 명시
+
+세부 판단과 적용 선행 조건은 [GraphDB EC2 편입](import-graphdb-ec2.md) 참조.
+
+## 2026-09-12 — GraphDB 보안 조치와 import 재검증
+
+### 문제와 대응
+
+- 최초 import 계획에서 EC2 user data의 자격 정보가 Terraform plan과 state에 저장될 수 있어 적용 차단
+- 공개 저장소의 적재 스크립트에서도 기존 Neo4j 비밀번호를 로그에 출력하는 문제 확인
+- 새 임의 비밀번호로 Neo4j 사용자, 서버·로컬 환경 파일과 GitHub Actions secret 갱신
+- 서버 환경 파일 권한을 `600`으로 제한하고 적재 로그의 비밀번호 출력 제거
+- SSH 비밀번호 로그인을 끄고 사용자 홈의 개인키 두 개를 root 전용 위치로 격리
+- 공개키가 등록된 팀 계정의 기존 로컬 비밀번호 잠금
+
+### 중단 작업과 복구 근거
+
+- Neo4j와 Promtail을 정상 종료한 뒤 EC2 중지
+- 중지된 루트 볼륨의 EBS 스냅샷 생성 완료
+- EC2 user data를 12,184바이트에서 0바이트로 변경
+- EC2 재시작 후 시스템 상태 검사, 공개키 SSH 설정, Neo4j와 Promtail 실행 확인
+- 추천 서버 설정으로 GraphDB 인증과 읽기 쿼리 수행
+- 재시작 전후 그래프 노드·관계 수 일치 확인
+
+### Terraform 재검증
+
+- 오래된 GraphDB 브랜치를 최신 main에 rebase하며 Airflow·상태 복구 문서와 구성 통합
+- `terraform fmt -check -recursive`, `terraform validate`, Python 회귀 테스트 15개 통과
+- 새 실제 계획: **1 to import, 0 to add, 0 to change, 0 to destroy**
+- 계획 검사기에서 GraphDB EC2의 빈 user data, 정확한 import 주소·ID와 기존 관리 자원 무변경 확인
+- 실제 import는 PR 머지 후 main에서 새 계획과 state 백업을 만든 뒤 사용자 적용 예정
+
+### 한계와 다음 작업
+
+- 복구 스냅샷은 기존 루트 볼륨과 같이 암호화되지 않음
+- 관리자 공개키 접속은 검증했으나 팀원별 사용자 계정의 공개키 접속은 각 장비에서 추가 확인 필요
+- GraphDB EC2 편입 후 전용 보안 그룹·규칙과 IAM 역할·프로파일·정책 연결을 별도 편입

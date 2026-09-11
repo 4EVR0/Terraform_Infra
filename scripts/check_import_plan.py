@@ -4,6 +4,11 @@ import json
 from pathlib import Path
 
 
+def root_resource_values(plan):
+    resources = plan.get("planned_values", {}).get("root_module", {}).get("resources", [])
+    return {resource.get("address"): resource.get("values", {}) for resource in resources}
+
+
 def verify_many(plan, expected):
     if not isinstance(expected, dict) or not expected or not all(
         isinstance(address, str) and address and isinstance(identifier, str) and identifier
@@ -33,6 +38,13 @@ def verify_many(plan, expected):
             imports[address] = change["importing"].get("id")
     if imports != expected:
         raise ValueError("Import targets or IDs do not match the reviewed set.")
+    planned_values = root_resource_values(plan)
+    for address in expected:
+        if address.startswith("aws_instance."):
+            if address not in planned_values:
+                raise ValueError("Imported EC2 instance is missing from planned values.")
+            if planned_values[address].get("user_data") not in (None, ""):
+                raise ValueError("Imported EC2 instance contains nonempty user_data; clear secrets before import.")
 
 
 def verify(plan, target, expected_id):
