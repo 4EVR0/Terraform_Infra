@@ -16,7 +16,8 @@
 - 아래 생성·이전 절차는 작업 이력 및 재구성 참고용. 현재 환경에 중복 실행하지 않음
 - 사용자 실행으로 별도 verification 상태의 동시 실행 잠금·해제 확인
 - 별도 텍스트 객체의 S3 버전 복구 PASS 기록 확인
-- Terraform state 자체의 복원 후 plan과 팀원별 접근 검증은 미완료
+- 격리된 verification key에서 Terraform state 과거 버전 복원, 변경 탐지, 최신 상태 재복원 후 `No changes` 확인
+- 팀원별 접근 검증은 미완료
 
 ## 설계 선택
 
@@ -116,6 +117,8 @@ cp bootstrap/state/terraform.tfvars.example bootstrap/state/local.auto.tfvars
 - 복구: 임시 key의 이전 버전을 복사해 최신 버전으로 복원하고 내용 일치 확인
 - 실제 bootstrap/project state는 검증용 데이터로 덮어쓰지 않음
 - 실제 복구 시 모든 writer 중지·잠금 상태 확인 후 진행. 활동 중인 실행자의 잠금을 강제로 제거하지 않음
+
+실제 Terraform 상태를 사용한 복구 시험의 구성, 단계별 의미, 결과와 한계는 [Terraform 상태 복구 검증](verify-state-recovery.md)에 기록.
 
 모의 테스트는 구성의 보호 조건을 검증하며 실제 S3 잠금·IAM 접근·버전 복원 성공을 입증하지 않음.
 

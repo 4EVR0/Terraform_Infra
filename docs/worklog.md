@@ -504,3 +504,32 @@
 - 이번 조사에서는 AWS 자원을 생성·수정·시작·삭제하지 않음
 
 세부 판단 기준은 [논문 크롤링 EC2 관리 판단](assess-pipeline-ec2.md) 참조.
+
+## 2026-09-12 — Terraform 상태 복구 및 plan 검증
+
+### 목적과 시험 구성
+
+- 일반 S3 객체 복구에서 나아가 Terraform state의 과거 버전을 실제로 복원하고 Terraform이 이를 읽는지 확인
+- 운영 bootstrap/project 상태와 분리된 고유 verification key 사용
+- 실제 AWS 자원을 만들지 않는 `terraform_data`에 `first`와 `second` 값을 순서대로 저장해 정상 상태 A와 문제 상황을 가정한 최신 상태 B 구성
+
+### 사용자 실행과 확인 근거
+
+- 상태 A 적용 후 같은 입력의 plan에서 `No changes` 확인
+- 상태 B 적용 후 같은 입력의 plan에서 `No changes` 확인
+- 두 상태의 S3 VersionId가 서로 다름을 사용자 실행으로 확인
+- 로컬 검증으로 A와 B의 lineage 일치, serial 1에서 2로 증가, 값이 각각 `first`와 `second`임을 확인
+- A의 S3 버전을 같은 key의 새 최신 버전으로 복원
+- 구성은 `second`로 유지한 plan에서 `first → second`, **0 to add, 1 to change, 0 to destroy** 확인
+- 해당 변경 계획은 적용하지 않고 B의 기존 버전을 새 최신 버전으로 재복원
+- 사용자 실행 최종 plan에서 `No changes` 확인
+
+### 결과와 한계
+
+- S3 과거 상태 복원, Terraform의 복원 상태 인식과 차이 계산, 시험 전 상태 원상 복귀까지 확인
+- 기존 버전을 삭제하거나 운영 상태 key를 수정하지 않음
+- 실제 EC2·데이터·AWS provider 자원의 생성·변경·삭제 없음
+- 상태 복구는 실제 인프라와 데이터를 복구하지 않으므로 자원별 백업 전략이 별도로 필요
+- 팀 로그인 방식과 최소 권한 정책 확정 후 팀원별 상태 읽기·잠금·plan 검증 필요
+
+단계별 의미와 실제 장애 적용 순서는 [Terraform 상태 복구 검증](verify-state-recovery.md) 참조.
