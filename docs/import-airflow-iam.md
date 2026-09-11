@@ -38,6 +38,9 @@
 - 실제 AWS plan: `7 to import, 0 to add, 0 to change, 0 to destroy`
 - 예상 IAM 주소·ID 7개의 정확한 대응 검사 통과
 - 기존 Airflow EC2와 보안 그룹, 모니터링 관리 자원 변경 없음 확인
+- 사용자 실행으로 IAM 역할 1개·인스턴스 프로파일 1개·정책 연결 5개 import 완료
+- 원격 state의 IAM 관리 주소 7개 등록 확인
+- 적용 후 후속 plan에서 `No changes` 확인
 
 ## PR 머지 후 적용 순서
 
