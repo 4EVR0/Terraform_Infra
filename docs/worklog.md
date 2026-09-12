@@ -591,10 +591,13 @@
 - `terraform fmt -check -recursive`, `terraform validate`, Python 회귀 테스트 15개 통과
 - 새 실제 계획: **1 to import, 0 to add, 0 to change, 0 to destroy**
 - 계획 검사기에서 GraphDB EC2의 빈 user data, 정확한 import 주소·ID와 기존 관리 자원 무변경 확인
-- 실제 import는 PR 머지 후 main에서 새 계획과 state 백업을 만든 뒤 사용자 적용 예정
+- PR 병합 후 `main`에서 계획을 새로 생성하고 적용 직전 원격 state 백업 완료
+- 사용자 적용 결과: **1 imported, 0 added, 0 changed, 0 destroyed**
+- 적용 후 `aws_instance.graphdb`의 원격 state 등록 확인
+- 같은 입력으로 다시 실행한 plan에서 **No changes** 확인
 
 ### 한계와 다음 작업
 
 - 복구 스냅샷은 기존 루트 볼륨과 같이 암호화되지 않음
 - 관리자 공개키 접속은 검증했으나 팀원별 사용자 계정의 공개키 접속은 각 장비에서 추가 확인 필요
-- GraphDB EC2 편입 후 전용 보안 그룹·규칙과 IAM 역할·프로파일·정책 연결을 별도 편입
+- EC2 본체 편입은 완료됐으며 전용 보안 그룹·규칙과 IAM 역할·프로파일·정책 연결은 별도 편입 필요

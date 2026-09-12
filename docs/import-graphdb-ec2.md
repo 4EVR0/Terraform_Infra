@@ -161,6 +161,17 @@ python3 scripts/check_import_plan.py \
 
 예상 결과는 GraphDB EC2 import 1건, 관리 자원 변경 0건, 비어 있는 `user_data`. 보안 조치 전 저장한 plan은 사용하지 않음.
 
+## 적용 결과
+
+- PR 병합 후 `main`에서 원격 backend를 다시 초기화하고 새 plan 생성
+- 편입 전 원격 state를 로컬 비공개 파일로 백업
+- 계획 검사 결과: import 1, add 0, change 0, destroy 0
+- 사용자 apply 결과: **1 imported, 0 added, 0 changed, 0 destroyed**
+- 적용 후 GraphDB EC2가 원격 state에 등록됐음을 확인
+- 후속 plan 결과: **No changes**
+
+따라서 실행 중이던 GraphDB EC2의 설정이나 수명 주기를 변경하지 않고 Terraform 관리 대상으로 편입 완료.
+
 ## 한계와 후속 범위
 
 - import plan은 EC2 속성 일치만 확인하며 Neo4j 데이터 무결성과 애플리케이션 정상 동작을 보장하지 않음
