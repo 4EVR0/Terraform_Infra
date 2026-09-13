@@ -29,8 +29,14 @@ resource "aws_instance" "graphdb" {
   tags                                 = var.graphdb_config.tags
   tenancy                              = var.graphdb_config.tenancy
   vpc_security_group_ids = setunion(
-    setsubtract(var.graphdb_config.vpc_security_group_ids, [var.graphdb_security_group.id]),
-    [aws_security_group.graphdb.id],
+    setsubtract(var.graphdb_config.vpc_security_group_ids, [
+      var.graphdb_security_group.id,
+      var.shared_ssh_security_group.id,
+    ]),
+    [
+      aws_security_group.graphdb.id,
+      aws_security_group.shared_ssh.id,
+    ],
   )
 
   capacity_reservation_specification {

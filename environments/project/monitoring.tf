@@ -23,8 +23,14 @@ resource "aws_instance" "monitoring" {
   tags                                 = var.monitoring_config.tags
   tenancy                              = var.monitoring_config.tenancy
   vpc_security_group_ids = setunion(
-    setsubtract(var.monitoring_config.vpc_security_group_ids, [var.monitoring_security_group.id]),
-    [aws_security_group.monitoring.id],
+    setsubtract(var.monitoring_config.vpc_security_group_ids, [
+      var.monitoring_security_group.id,
+      var.shared_ssh_security_group.id,
+    ]),
+    [
+      aws_security_group.monitoring.id,
+      aws_security_group.shared_ssh.id,
+    ],
   )
   capacity_reservation_specification {
     capacity_reservation_preference = var.monitoring_config.capacity_reservation_specification.capacity_reservation_preference
