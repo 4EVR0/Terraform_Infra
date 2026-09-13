@@ -15,7 +15,7 @@ resource "aws_instance" "graphdb" {
   force_destroy                        = var.graphdb_config.force_destroy
   get_password_data                    = var.graphdb_config.get_password_data
   hibernation                          = var.graphdb_config.hibernation
-  iam_instance_profile                 = var.graphdb_config.iam_instance_profile
+  iam_instance_profile                 = aws_iam_instance_profile.graphdb.name
   instance_initiated_shutdown_behavior = var.graphdb_config.instance_initiated_shutdown_behavior
   instance_type                        = var.graphdb_config.instance_type
   ipv6_addresses                       = var.graphdb_config.ipv6_addresses
@@ -28,7 +28,10 @@ resource "aws_instance" "graphdb" {
   subnet_id                            = var.graphdb_config.subnet_id
   tags                                 = var.graphdb_config.tags
   tenancy                              = var.graphdb_config.tenancy
-  vpc_security_group_ids               = var.graphdb_config.vpc_security_group_ids
+  vpc_security_group_ids = setunion(
+    setsubtract(var.graphdb_config.vpc_security_group_ids, [var.graphdb_security_group.id]),
+    [aws_security_group.graphdb.id],
+  )
 
   capacity_reservation_specification {
     capacity_reservation_preference = var.graphdb_config.capacity_reservation_specification.capacity_reservation_preference
@@ -77,6 +80,11 @@ resource "aws_instance" "graphdb" {
 
   lifecycle {
     prevent_destroy = true
+
+    precondition {
+      condition     = var.graphdb_config.iam_instance_profile == var.graphdb_iam.instance_profile.name
+      error_message = "The reviewed GraphDB instance profile must match the IAM profile being adopted."
+    }
 
     # Legacy bootstrap data can contain secrets and is intentionally not copied
     # into Terraform configuration. Manage it only after credential rotation.

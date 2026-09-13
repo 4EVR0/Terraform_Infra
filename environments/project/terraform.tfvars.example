@@ -21,6 +21,9 @@
 # The GraphDB EC2 import additionally requires graphdb_config, whose full object
 # schema is defined in graphdb-variables.tf. Keep all reviewed instance values in
 # an ignored local tfvars file; never copy legacy user data into Terraform input.
+# The GraphDB dependency import additionally requires graphdb_security_group and
+# graphdb_iam. Keep existing rule IDs, policy ARNs, and policy documents in an
+# ignored local tfvars file. The shared SSH group is outside this import scope.
 aws_account_id = "<AWS_ACCOUNT_ID>"
 aws_region     = "ap-northeast-2"
 vpc_id         = "<VPC_ID>"
