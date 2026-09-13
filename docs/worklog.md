@@ -624,7 +624,10 @@
 ### 한계와 다음 작업
 
 - 현행 구성 편입과 접근·권한 최소화 작업을 분리
-- PR 병합 후 새 plan과 state 백업을 생성해 사용자가 apply
+- PR 병합 후 새 plan과 state 백업 생성 완료
+- 사용자 apply 결과: **10 imported, 0 added, 0 changed, 0 destroyed**
+- 보안 그룹·규칙과 IAM 자원 10건의 원격 state 등록 확인
+- 적용 후 후속 plan에서 **No changes** 확인
 - 적용 후 공용 SSH 보안 그룹의 관리 범위와 네트워크 접근 개선 검토
 
 세부 설계와 검증 절차는 [GraphDB 연결 자원 Terraform 편입](import-graphdb-dependencies.md) 참조.
