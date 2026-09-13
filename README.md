@@ -3,19 +3,21 @@
 프로젝트에서 사용하는 AWS 인프라 전체를 코드로 관리하기 위한 작업 공간.
 첫 목표는 **기존 자원의 재생성 없이 Terraform 관리 대상으로 편입**. 이후 변경 이력 관리와 장애 복구 검증으로 확장.
 
-## 현재 상태 — 2026-09-12
+## 현재 상태 — 2026-09-13
 
 - 서울 리전과 일부 글로벌 서비스의 AWS 실물 조회 완료
 - 실제 자원 목록·상태·보안 설정은 로컬 인벤토리에서 관리
 - Terraform 1.16.1 로컬 설치, AWS provider 6.63.0 선택 및 lock 파일 생성
-- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링 EC2와 종속 자원, Airflow EC2·전용 보안 그룹·IAM 관리, GraphDB EC2 편입 준비
+- 활성 Terraform 구성: 기존 VPC·EC2 조회, 모니터링·Airflow·GraphDB EC2와 전용 보안 그룹·IAM 관리
 - 이후 진행: 전용 상태 버킷 생성 및 bootstrap/project 원격 상태 저장 확인(사용자 실행·확인)
 - 운영 검증: 사용자 실행으로 동시 실행 잠금·해제, 별도 S3 객체 버전 복구, 격리된 Terraform state 복원 후 plan 확인
 - 완료된 편입: 사용자가 모니터링 EC2, 전용 보안 그룹·규칙, 연결 IAM 자원·S3 import 적용 후 각각 `No changes` 확인
-- 완료된 EC2 편입: 모니터링과 Airflow. 사용자가 각각 적용 후 `No changes` 확인
+- 완료된 EC2 편입: 모니터링, Airflow와 GraphDB. 사용자가 각각 적용 후 `No changes` 확인
 - 완료된 Airflow 종속 자원 편입: 전용 보안 그룹 1개·규칙 4개와 IAM 자원 7개. 원격 state 등록 및 `No changes` 확인
+- 완료된 GraphDB 종속 자원 편입: 전용 보안 그룹·규칙과 IAM 자원 10개. 원격 state 등록 및 `No changes` 확인
 - 논문 크롤링 EC2: 장시간 크롤링을 위해 만든 임시 실행 서버로 확인. 재사용 여부 결정과 내부 데이터 확인 전 기존 서버 편입 보류
-- 아직 수행하지 않은 작업: 나머지 EC2·종속 자원 편입, 팀원별 상태 접근 검증
+- 진행 중인 편입: 프로젝트 공용 SSH 보안 그룹과 규칙 2개
+- 아직 수행하지 않은 작업: 팀원별 상태 접근 검증과 인벤토리 누락 범위 확인
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -33,6 +35,8 @@
 - Airflow IAM 역할·인스턴스 프로파일·관리형 정책 연결 7개 import 적용 완료. 원격 state 등록 확인 및 후속 `No changes` 확인
 - GraphDB EC2 보안 조치 후 새 계획에서 `1 to import, 0 to add, 0 to change, 0 to destroy`와 빈 user data 확인
 - GraphDB EC2: 자격 정보 교체와 user data 제거 후 새 계획에서 import 1건 외 변경 없음 및 보안 검사 통과
+- GraphDB EC2와 연결 자원 적용 완료. 원격 state 등록 및 후속 `No changes` 확인
+- 공용 SSH 보안 그룹 계획: `3 to import, 0 to add, 0 to change, 0 to destroy`
 
 ## 범위
 
@@ -128,8 +132,8 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. GraphDB 편입 PR 머지 후 main에서 새 계획·state 백업·사용자 적용
-2. 나머지 EC2와 종속 자원의 변경 없는 편입
+1. 공용 SSH 보안 그룹 PR 머지 후 새 계획·state 백업·사용자 적용
+2. 공용 SSH 접근 범위 개선을 위한 접속 경로 검증
 3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
 4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
 5. 팀 접근 권한 구성 및 팀원별 상태 접근 검증

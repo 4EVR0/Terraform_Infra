@@ -631,3 +631,28 @@
 - 적용 후 공용 SSH 보안 그룹의 관리 범위와 네트워크 접근 개선 검토
 
 세부 설계와 검증 절차는 [GraphDB 연결 자원 Terraform 편입](import-graphdb-dependencies.md) 참조.
+
+## 2026-09-13 — 공용 SSH 보안 그룹 편입 준비
+
+### 소유 범위와 설계
+
+- 여러 프로젝트 EC2가 공유하는 보안 그룹을 서버별 전용 구성에서 분리해 공용 자원으로 정의
+- 관리 중인 모니터링·Airflow·GraphDB EC2의 기존 그룹 ID를 Terraform 자원 참조로 전환
+- 편입 보류 중인 파이프라인 EC2의 현재 연결은 유지
+- 현행 규칙 편입과 접근 범위 축소를 별도 변경으로 분리
+
+### 구현과 검증
+
+- 보안 그룹 본체와 ingress·egress 규칙을 독립 자원으로 모델링
+- 관리 중인 세 EC2에 기존 그룹이 연결됐는지 확인하는 사전 조건 추가
+- 실제 값은 Git 제외 로컬 변수 파일에 보관하고 모든 자원에 `prevent_destroy` 적용
+- `terraform fmt -check -recursive`, `terraform validate`, Python 테스트 15개 통과
+- 최종 실제 plan: **3 to import, 0 to add, 0 to change, 0 to destroy**
+- 계획 검사기에서 정확한 import 3건과 기존 관리 자원 무변경 확인
+
+### 다음 작업
+
+- PR 병합 후 새 plan과 state 백업을 생성해 사용자 apply
+- 적용 후 Tailscale·팀원별 공개키 접속 근거를 확보하고 SSH 접근 범위 개선
+
+세부 설계와 적용 절차는 [프로젝트 공용 SSH 보안 그룹 편입](import-shared-ssh-security-group.md) 참조.

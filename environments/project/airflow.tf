@@ -29,8 +29,14 @@ resource "aws_instance" "airflow" {
   tags                                 = var.airflow_config.tags
   tenancy                              = var.airflow_config.tenancy
   vpc_security_group_ids = setunion(
-    setsubtract(var.airflow_config.vpc_security_group_ids, [var.airflow_security_group.id]),
-    [aws_security_group.airflow.id],
+    setsubtract(var.airflow_config.vpc_security_group_ids, [
+      var.airflow_security_group.id,
+      var.shared_ssh_security_group.id,
+    ]),
+    [
+      aws_security_group.airflow.id,
+      aws_security_group.shared_ssh.id,
+    ],
   )
 
   capacity_reservation_specification {
