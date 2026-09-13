@@ -39,6 +39,17 @@
 5. 사용자 apply
 6. 원격 state 등록과 후속 plan의 `No changes` 확인
 
+## 적용 결과
+
+- 병합된 `main`에서 원격 backend 재초기화 및 새 plan 생성
+- 적용 직전 원격 state 백업과 무결성 확인
+- 최종 계획: **3 to import, 0 to add, 0 to change, 0 to destroy**
+- 사용자 apply 결과: **3 imported, 0 added, 0 changed, 0 destroyed**
+- 공용 그룹 본체와 규칙 2건의 원격 state 등록 확인
+- 같은 변수 입력으로 실행한 후속 plan에서 **No changes** 확인
+
+연결된 EC2나 SSH 규칙을 변경하지 않고 프로젝트 공용 보안 그룹을 Terraform 관리 대상으로 편입 완료.
+
 ## 트레이드오프와 후속 작업
 
 - 현재 규칙을 그대로 편입하므로 import 자체는 접속 경로나 접근 범위를 개선하지 않음
