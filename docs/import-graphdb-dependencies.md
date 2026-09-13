@@ -55,6 +55,17 @@
 5. 사용자가 저장된 plan 적용
 6. state 등록 확인과 후속 plan의 `No changes` 확인
 
+## 적용 결과
+
+- 병합된 `main`에서 원격 backend 재초기화 및 새 plan 생성
+- 적용 직전 원격 state 백업과 무결성 확인
+- 최종 계획: **10 to import, 0 to add, 0 to change, 0 to destroy**
+- 사용자 apply 결과: **10 imported, 0 added, 0 changed, 0 destroyed**
+- 대상 보안 그룹·규칙과 IAM 자원 10건의 원격 state 등록 확인
+- 같은 변수 입력으로 실행한 후속 plan에서 **No changes** 확인
+
+GraphDB EC2와 연결 자원의 실제 설정을 변경하지 않고 전용 보안 그룹과 IAM 구성을 Terraform 관리 대상으로 편입 완료.
+
 ## 한계와 후속 작업
 
 - 이번 편입은 현재 설정을 그대로 코드화하며 접근 범위나 권한을 축소하지 않음
