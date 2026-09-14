@@ -16,7 +16,7 @@
 - 완료된 Airflow 종속 자원 편입: 전용 보안 그룹 1개·규칙 4개와 IAM 자원 7개. 원격 state 등록 및 `No changes` 확인
 - 완료된 GraphDB 종속 자원 편입: 전용 보안 그룹·규칙과 IAM 자원 10개. 원격 state 등록 및 `No changes` 확인
 - 논문 크롤링 EC2: 장시간 크롤링을 위해 만든 임시 실행 서버로 확인. 재사용 여부 결정과 내부 데이터 확인 전 기존 서버 편입 보류
-- 진행 중인 편입: 프로젝트 공용 SSH 보안 그룹과 규칙 2개
+- 완료된 공용 자원 편입: 프로젝트 공용 SSH 보안 그룹과 규칙 2개. 원격 state 등록 및 `No changes` 확인
 - 아직 수행하지 않은 작업: 팀원별 상태 접근 검증과 인벤토리 누락 범위 확인
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
@@ -37,6 +37,7 @@
 - GraphDB EC2: 자격 정보 교체와 user data 제거 후 새 계획에서 import 1건 외 변경 없음 및 보안 검사 통과
 - GraphDB EC2와 연결 자원 적용 완료. 원격 state 등록 및 후속 `No changes` 확인
 - 공용 SSH 보안 그룹 계획: `3 to import, 0 to add, 0 to change, 0 to destroy`
+- 공용 SSH 보안 그룹 적용 완료. 원격 state 등록 및 후속 `No changes` 확인
 
 ## 범위
 
@@ -132,8 +133,8 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. 공용 SSH 보안 그룹 PR 머지 후 새 계획·state 백업·사용자 적용
-2. 공용 SSH 접근 범위 개선을 위한 접속 경로 검증
+1. 공용 SSH 접근 범위 개선을 위한 접속 경로 검증
+2. 팀원별 상태 접근 검증과 최소 권한 로그인 방식 확정
 3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
 4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
 5. 팀 접근 권한 구성 및 팀원별 상태 접근 검증

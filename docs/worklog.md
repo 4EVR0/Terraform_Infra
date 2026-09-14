@@ -652,7 +652,10 @@
 
 ### 다음 작업
 
-- PR 병합 후 새 plan과 state 백업을 생성해 사용자 apply
+- PR 병합 후 새 plan과 state 백업 생성 완료
+- 사용자 apply 결과: **3 imported, 0 added, 0 changed, 0 destroyed**
+- 공용 그룹 본체와 규칙 2건의 원격 state 등록 확인
+- 적용 후 후속 plan에서 **No changes** 확인
 - 적용 후 Tailscale·팀원별 공개키 접속 근거를 확보하고 SSH 접근 범위 개선
 
 세부 설계와 적용 절차는 [프로젝트 공용 SSH 보안 그룹 편입](import-shared-ssh-security-group.md) 참조.
