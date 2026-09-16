@@ -33,10 +33,7 @@ resource "aws_instance" "airflow" {
       var.airflow_security_group.id,
       var.shared_ssh_security_group.id,
     ]),
-    [
-      aws_security_group.airflow.id,
-      aws_security_group.shared_ssh.id,
-    ],
+    [aws_security_group.airflow.id],
   )
 
   capacity_reservation_specification {

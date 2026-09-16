@@ -693,3 +693,28 @@
 - 모니터링·Airflow·파이프라인은 대체 접속 경로를 확보한 뒤 별도 변경
 
 세부 근거와 적용 게이트는 [GraphDB 공개 SSH 경로 단계적 제거](harden-graphdb-ssh.md) 참조.
+
+## 2026-09-16 — Airflow 공개 SSH 경로 분리 준비
+
+### SSM 관리 경로 검증
+
+- Airflow를 시작해 SSM Agent가 온라인 관리 노드로 등록됨을 확인
+- 첫 명령은 일반 패키지 서비스 이름을 조회해 실패했으나 root 명령 실행과 응답은 확인
+- Ubuntu Snap 서비스 단위로 수정한 진단 명령 성공
+- SSM root 명령 채널과 Agent 활성 상태를 확인한 뒤 Airflow를 기존 중지 상태로 복구
+
+### 구현과 검증
+
+- Airflow EC2의 공용 SSH 그룹 참조 제거, 전용 그룹 유지
+- GraphDB 작업에서 추가한 계획 검사기를 재사용해 정확한 그룹 하나의 제거만 허용
+- `terraform fmt -check -recursive`, `terraform validate`, Python 테스트 20개 통과
+- 최종 plan: **0 to add, 1 to change, 0 to destroy**
+- Airflow 외 관리 자원 변경 없음 확인
+
+### 다음 작업
+
+- PR 병합 후 새 plan과 state 백업 생성
+- Airflow 시작과 SSM 명령 재검증 후 적용
+- 적용 후 SSM 채널 유지, 공용 SSH 차단과 `No changes` 확인
+
+세부 근거와 적용 게이트는 [Airflow 공개 SSH 경로 단계적 제거](harden-airflow-ssh.md) 참조.

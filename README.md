@@ -133,8 +133,8 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. 모니터링·Airflow·파이프라인의 대체 관리 접속 경로 확보
-2. 검증된 서버부터 공용 SSH 그룹 단계적 분리
+1. SSM 관리 경로가 검증된 Airflow의 공용 SSH 그룹 분리
+2. 모니터링·파이프라인의 대체 관리 접속 경로 확보
 3. 팀원별 상태 접근 검증과 최소 권한 로그인 방식 확정
 3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
 4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
@@ -165,3 +165,5 @@ Airflow IAM의 소유 경계, 정책 연결 관리 방식과 적용 절차는 [A
 GraphDB EC2의 편입 준비, 발견된 user data 위험과 적용 선행 조건은 [GraphDB EC2 편입](docs/import-graphdb-ec2.md) 참조.
 
 공용 SSH 그룹의 단계적 제거 근거와 적용 게이트는 [GraphDB 공개 SSH 경로 단계적 제거](docs/harden-graphdb-ssh.md) 참조.
+
+Airflow의 SSM 대체 경로 검증과 적용 게이트는 [Airflow 공개 SSH 경로 단계적 제거](docs/harden-airflow-ssh.md) 참조.
