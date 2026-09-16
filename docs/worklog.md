@@ -767,9 +767,11 @@
 
 ### 다음 작업
 
-- PR 병합 후 새 plan과 state 백업 생성 및 사용자 apply
-- 전용 보안 그룹만 남았는지와 공개 TCP 22 차단 확인
-- SSM root 명령 재검증 후 서버를 기존 중지 상태로 복구
-- 후속 plan의 `No changes` 확인
+- PR 병합 후 새 plan과 state 백업 생성 완료
+- 사용자 apply 결과: **0 added, 1 changed, 0 destroyed**
+- 전용 보안 그룹 하나만 연결되고 TCP 22 인바운드 규칙이 없는 상태 확인
+- SSM Agent `Online`과 원격 root 명령 재검증 성공
+- 서버를 기존 중지 상태로 복구하고 후속 plan에서 **No changes** 확인
+- 파이프라인 서버의 관리 경로와 장기 보존 여부 검토 예정
 
 세부 근거와 적용 게이트는 [모니터링 공개 SSH 경로 단계적 제거](harden-monitoring-ssh.md) 참조.
