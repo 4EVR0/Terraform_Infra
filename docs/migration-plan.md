@@ -90,6 +90,8 @@ Airflow IAM 자원 7개는 PR #13 머지 후 사용자가 적용 완료. 원격 
 
 파이프라인 서버의 재사용 계획이 없어 비공개 복구용 AMI와 루트 스냅샷의 완료 상태를 확인한 뒤 EC2를 종료. 기존 루트 볼륨 삭제와 공용 SSH 보안 그룹의 남은 연결 0개를 확인. 사용처가 사라진 그룹 본체와 규칙 두 개만 제거하는 `0 add, 0 change, 3 destroy` 계획을 전용 검사기로 검증.
 
+공용 SSH 그룹과 규칙 두 개의 제거를 사용자 적용 완료. AWS와 Terraform state에서 삭제를 확인하고 후속 plan의 `No changes` 검증. 프로젝트 공통 공개 TCP 22 진입점 정리 완료.
+
 GraphDB EC2의 최초 계획에서 user data에 포함된 자격 정보가 plan과 state로 확산될 위험을 확인해 적용을 중단. Neo4j 자격 정보 교체, SSH 강화, 서버 내 개인키 격리, 계정 비밀번호 잠금, EC2 user data 제거와 재시작 검증을 수행. 이후 새 계획에서 `1 import, 0 add/change/destroy`, 빈 user data와 기존 관리 자원 무변경을 확인해 편입 선행 조건을 충족. EC2 적용 후 전용 보안 그룹과 IAM을 별도 편입할 예정.
 
 GraphDB EC2와 전용 보안 그룹·규칙, IAM 역할·프로파일·정책 연결은 사용자가 단계별로 적용 완료. 원격 state 등록과 각 후속 plan의 `No changes`를 확인. 이어서 프로젝트 EC2가 공유하는 SSH 보안 그룹을 공용 자원으로 분리하고 그룹 본체와 규칙 2개에 대해 `3 import, 0 add/change/destroy` 계획을 검증. 접근 범위 축소는 접속 경로 검증 후 별도 운영 변경으로 진행.
