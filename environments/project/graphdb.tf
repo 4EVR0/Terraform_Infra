@@ -33,10 +33,7 @@ resource "aws_instance" "graphdb" {
       var.graphdb_security_group.id,
       var.shared_ssh_security_group.id,
     ]),
-    [
-      aws_security_group.graphdb.id,
-      aws_security_group.shared_ssh.id,
-    ],
+    [aws_security_group.graphdb.id],
   )
 
   capacity_reservation_specification {
@@ -92,8 +89,12 @@ resource "aws_instance" "graphdb" {
       error_message = "The reviewed GraphDB instance profile must match the IAM profile being adopted."
     }
 
-    # Legacy bootstrap data can contain secrets and is intentionally not copied
-    # into Terraform configuration. Manage it only after credential rotation.
-    ignore_changes = [user_data]
+    # AWS reports dynamic public IP association differently across stop/start,
+    # while changing the launch-time flag would replace the existing instance.
+    # Legacy bootstrap data is also intentionally excluded after secret rotation.
+    ignore_changes = [
+      associate_public_ip_address,
+      user_data,
+    ]
   }
 }

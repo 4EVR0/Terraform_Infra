@@ -659,3 +659,34 @@
 - 적용 후 Tailscale·팀원별 공개키 접속 근거를 확보하고 SSH 접근 범위 개선
 
 세부 설계와 적용 절차는 [프로젝트 공용 SSH 보안 그룹 편입](import-shared-ssh-security-group.md) 참조.
+
+## 2026-09-16 — GraphDB 공개 SSH 경로 분리 준비
+
+### 접속 경로 조사
+
+- 프로젝트 EC2가 모두 중지 상태이며 SSM 관리 대상이 없음을 확인
+- Tailscale에는 GraphDB와 모니터링 노드가 등록되어 있고 Airflow·파이프라인은 확인되지 않음
+- 단계적 변경 대상으로 기존 RSA 키 접속이 가능한 GraphDB를 우선 선정
+- GraphDB를 잠시 시작해 Tailscale SSH, 접속 계정과 관리자 권한 확인 후 다시 중지
+
+### 계획 차단과 수정
+
+- 최초 plan에서 동적 공인 IP 연결 상태 차이로 GraphDB EC2 교체 제안 발견
+- `prevent_destroy`가 교체를 차단해 실제 AWS 변경 없음
+- 중지·시작에 따라 달라지는 공인 IP 관측값을 수명 주기 비교에서 제외하고 삭제 방지 유지
+- 공용 SSH 그룹 하나만 제거하고 GraphDB 전용 그룹을 유지하도록 구성
+
+### 검증
+
+- 정확한 보안 그룹 제거만 허용하는 계획 검사기와 테스트 추가
+- `terraform fmt -check -recursive`, `terraform validate`, Python 테스트 20개 통과
+- 최종 plan: **0 to add, 1 to change, 0 to destroy**
+- GraphDB 시작·중지 검증 후 재생성한 plan에서도 동일 결과 확인
+
+### 다음 작업
+
+- PR 병합 후 새 plan과 state 백업 생성
+- GraphDB를 시작해 Tailscale SSH 재검증 후 적용하고 새 세션 연결 확인
+- 모니터링·Airflow·파이프라인은 대체 접속 경로를 확보한 뒤 별도 변경
+
+세부 근거와 적용 게이트는 [GraphDB 공개 SSH 경로 단계적 제거](harden-graphdb-ssh.md) 참조.
