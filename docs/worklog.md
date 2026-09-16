@@ -713,8 +713,10 @@
 
 ### 다음 작업
 
-- PR 병합 후 새 plan과 state 백업 생성
-- Airflow 시작과 SSM 명령 재검증 후 적용
-- 적용 후 SSM 채널 유지, 공용 SSH 차단과 `No changes` 확인
+- PR 병합 후 새 plan과 state 백업 생성 완료
+- 사용자 apply 결과: **0 added, 1 changed, 0 destroyed**
+- Airflow 전용 보안 그룹만 연결된 상태와 공용 SSH 경로 차단 확인
+- SSM Agent 온라인과 root 명령 채널 재검증
+- Airflow를 기존 중지 상태로 복구하고 후속 plan에서 **No changes** 확인
 
 세부 근거와 적용 게이트는 [Airflow 공개 SSH 경로 단계적 제거](harden-airflow-ssh.md) 참조.
