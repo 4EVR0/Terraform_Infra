@@ -133,8 +133,9 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
-1. Tailscale 접속이 검증된 GraphDB부터 공용 SSH 그룹 단계적 분리
-2. 팀원별 상태 접근 검증과 최소 권한 로그인 방식 확정
+1. 모니터링·Airflow·파이프라인의 대체 관리 접속 경로 확보
+2. 검증된 서버부터 공용 SSH 그룹 단계적 분리
+3. 팀원별 상태 접근 검증과 최소 권한 로그인 방식 확정
 3. 버전 관리·보존 정책을 별도 운영 변경으로 설계
 4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
 5. 팀 접근 권한 구성 및 팀원별 상태 접근 검증

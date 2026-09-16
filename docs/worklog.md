@@ -685,8 +685,11 @@
 
 ### 다음 작업
 
-- PR 병합 후 새 plan과 state 백업 생성
-- GraphDB를 시작해 Tailscale SSH 재검증 후 적용하고 새 세션 연결 확인
+- PR 병합 후 새 plan과 state 백업 생성 완료
+- 사용자 apply 결과: **0 added, 1 changed, 0 destroyed**
+- GraphDB 전용 보안 그룹만 연결된 상태와 공용 SSH 경로 차단 확인
+- Tailscale RSA SSH 새 세션과 관리자 권한 재검증
+- GraphDB를 기존 중지 상태로 복구하고 후속 plan에서 **No changes** 확인
 - 모니터링·Airflow·파이프라인은 대체 접속 경로를 확보한 뒤 별도 변경
 
 세부 근거와 적용 게이트는 [GraphDB 공개 SSH 경로 단계적 제거](harden-graphdb-ssh.md) 참조.
