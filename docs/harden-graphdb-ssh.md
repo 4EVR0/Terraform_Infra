@@ -56,6 +56,19 @@
 
 새 Tailscale SSH 연결이 실패하면 적용을 중단. 적용 후 문제가 생기면 AWS 관리 권한으로 기존 공용 그룹 연결을 복구하고 원인을 확인.
 
+## 적용 결과
+
+- 병합된 `main`에서 Tailscale RSA SSH와 관리자 권한 재검증
+- 적용 직전 원격 state 백업과 전용 계획 검사 통과
+- 사용자 apply 결과: **0 added, 1 changed, 0 destroyed**
+- GraphDB에 서비스 전용 보안 그룹만 연결되고 공용 SSH 그룹이 제거된 상태 확인
+- 공용 SSH 경로 차단과 Tailscale 새 SSH 세션 연결 성공 확인
+- 비밀번호 없는 관리자 권한 재검증
+- GraphDB를 기존 중지 상태로 복구
+- 후속 plan에서 **No changes** 확인
+
+따라서 AWS 공인 네트워크를 통한 GraphDB SSH 진입점을 제거하면서 Tailscale 관리 경로와 복구 권한 유지.
+
 ## 한계와 다음 작업
 
 - 공용 SSH 그룹은 모니터링·Airflow·파이프라인에 계속 연결됨
