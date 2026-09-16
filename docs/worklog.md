@@ -801,4 +801,12 @@
 - 실제 plan: **0 to add, 0 to change, 3 to destroy**
 - 세 삭제 대상 외 다른 관리 자원 변경 없음 확인
 
+### 적용 결과
+
+- PR 병합 후 원격 state 백업과 연결 대상 0개 재확인
+- 사용자 apply 결과: **0 added, 0 changed, 3 destroyed**
+- AWS에서 공용 SSH 그룹 삭제 확인
+- Terraform state에서 그룹과 규칙 주소 제거 확인
+- 후속 plan에서 **No changes** 확인
+
 세부 결과와 적용 게이트는 [논문 크롤링 EC2 안전 폐기](retire-pipeline-ec2.md) 참조.
