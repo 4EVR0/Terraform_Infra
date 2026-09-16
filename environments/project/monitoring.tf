@@ -27,10 +27,7 @@ resource "aws_instance" "monitoring" {
       var.monitoring_security_group.id,
       var.shared_ssh_security_group.id,
     ]),
-    [
-      aws_security_group.monitoring.id,
-      aws_security_group.shared_ssh.id,
-    ],
+    [aws_security_group.monitoring.id],
   )
   capacity_reservation_specification {
     capacity_reservation_preference = var.monitoring_config.capacity_reservation_specification.capacity_reservation_preference
