@@ -100,6 +100,8 @@ GraphDB의 공용 SSH 그룹 분리를 사용자 적용 완료. 전용 보안 �
 
 Airflow는 기존 IAM 역할과 Ubuntu Snap SSM Agent를 이용한 root 명령 채널을 실제 검증. 공용 SSH 그룹 하나만 제거하고 Airflow 전용 그룹을 유지하는 `0 add, 1 change, 0 destroy` 계획을 검사기로 확인. SSM 재검증을 적용 전후 게이트로 사용.
 
+Airflow의 공용 SSH 그룹 분리를 사용자 적용 완료. 전용 보안 그룹만 연결된 상태, 공용 SSH 경로 차단, SSM root 명령 채널, 기존 중지 상태 복구 및 후속 plan의 `No changes`를 확인.
+
 ## 5. 운영 변경과 복구 검증
 
 - 태그 정리·접근 제한·백업 강화는 최초 편입과 분리한 변경 계획으로 진행

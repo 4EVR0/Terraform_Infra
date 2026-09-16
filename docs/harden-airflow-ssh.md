@@ -45,6 +45,18 @@
 
 SSM 연결이 실패하면 적용을 중단. 적용 후 문제가 생기면 AWS 관리 권한으로 기존 공용 그룹을 다시 연결하고 원인을 확인.
 
+## 적용 결과
+
+- 병합된 `main`에서 SSM Agent 온라인과 root 명령 채널 재검증
+- 적용 직전 원격 state 백업과 전용 계획 검사 통과
+- 사용자 apply 결과: **0 added, 1 changed, 0 destroyed**
+- Airflow에 전용 보안 그룹만 연결되고 공용 SSH 그룹이 제거된 상태 확인
+- 공용 SSH 경로 차단과 SSM root 명령 재실행 성공 확인
+- Airflow를 기존 중지 상태로 복구
+- 후속 plan에서 **No changes** 확인
+
+따라서 Airflow 공인 SSH 진입점을 제거하면서 AWS 관리 채널과 관리자 실행 권한 유지.
+
 ## 한계와 다음 작업
 
 - 로컬 Session Manager 플러그인이 없어 이번 검증은 SSM Run Command를 사용
