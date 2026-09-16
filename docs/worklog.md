@@ -739,8 +739,11 @@
 
 ### 다음 작업
 
-- PR 병합 후 새 plan과 state 백업 생성 및 사용자 apply
-- 모니터링 시작 후 SSM Agent 온라인과 root 명령 채널 확인
-- 검증 성공 시 별도 PR에서 공용 SSH 그룹 연결 제거
+- PR 병합 후 새 plan과 state 백업 생성 완료
+- 사용자 apply 결과: **1 added, 0 changed, 0 destroyed**
+- IAM 정책 연결과 SSM Agent `Online` 확인
+- SSM 원격 명령 `Success`, 종료 코드 0, 실행 사용자 `root` 확인
+- 모니터링을 기존 중지 상태로 복구하고 후속 plan에서 **No changes** 확인
+- 별도 PR에서 공용 SSH 그룹 연결 제거 예정
 
 세부 설계와 적용 절차는 [모니터링 서버 SSM 관리 경로 추가](enable-monitoring-ssm.md) 참조.

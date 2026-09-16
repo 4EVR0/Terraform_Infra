@@ -20,7 +20,7 @@
 - 연결 자원에 `prevent_destroy` 적용
 - 정책 연결 한 건 외 변경을 거부하고 역할·정책 ARN을 검사하는 plan 검사기 추가
 
-## 검증 결과
+## 계획 검증 결과
 
 - `terraform fmt -check -recursive` 통과
 - `terraform validate` 통과
@@ -28,22 +28,21 @@
 - 실제 plan: **1 to add, 0 to change, 0 to destroy**
 - 계획 검사기: 검토한 역할에 SSM 정책 연결 한 건만 생성, 다른 관리 자원 변경 없음
 
-## 적용 및 검증 순서
+## 적용 및 실제 검증 결과
 
-1. PR 병합 후 `main`에서 새 plan 생성
-2. 적용 직전 원격 state 백업
-3. 사용자 apply로 IAM 정책 연결 생성
-4. 모니터링 EC2 시작
-5. SSM Agent 온라인 등록 확인
-6. SSM root 진단 명령 성공 확인
-7. 모니터링 EC2를 기존 중지 상태로 복구
-8. 후속 plan의 `No changes` 확인
+1. PR 병합 후 `main`에서 새 plan 생성 및 원격 state 백업 완료
+2. 사용자 apply 결과: **1 added, 0 changed, 0 destroyed**
+3. IAM 역할의 SSM 관리 정책 연결 확인
+4. 모니터링 EC2를 잠시 시작해 SSM Agent `Online` 확인
+5. SSM 원격 진단 명령 `Success`, 종료 코드 0, 실행 사용자 `root` 확인
+6. 모니터링 EC2를 기존 중지 상태로 복구
+7. 후속 plan의 **No changes** 확인
 
-SSM Agent가 온라인으로 전환되지 않으면 공개 SSH 그룹을 제거하지 않고 Agent 설치·네트워크·IAM 연결을 진단.
+SSM을 독립적인 관리·복구 경로로 실제 사용할 수 있음을 확인. 다음 변경에서는 이 검증을 적용 전후 게이트로 사용.
 
 ## 트레이드오프와 후속 작업
 
 - SSM 정책 연결은 모니터링 역할의 권한을 늘리는 변경
 - 공개 SSH 제거 전에 대체 경로를 확보해 잠금 위험을 줄이는 이점이 더 큼
-- SSM 검증이 끝난 뒤 별도 PR에서 모니터링 EC2의 공용 SSH 그룹 연결 제거
+- 별도 PR에서 모니터링 EC2의 공용 SSH 그룹 연결 제거
 - 팀 IAM 주체의 SSM 접근 권한과 감사 로그 보존 정책은 별도 검토 필요
