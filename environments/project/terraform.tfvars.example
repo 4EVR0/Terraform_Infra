@@ -23,9 +23,7 @@
 # an ignored local tfvars file; never copy legacy user data into Terraform input.
 # The GraphDB dependency import additionally requires graphdb_security_group and
 # graphdb_iam. Keep existing rule IDs, policy ARNs, and policy documents in an
-# ignored local tfvars file. The shared SSH group is managed as a separate resource.
-# The project-wide SSH group import additionally requires
-# shared_ssh_security_group. Keep its ID and rule IDs in ignored local tfvars.
+# ignored local tfvars file.
 aws_account_id = "<AWS_ACCOUNT_ID>"
 aws_region     = "ap-northeast-2"
 vpc_id         = "<VPC_ID>"

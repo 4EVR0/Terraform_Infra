@@ -25,7 +25,6 @@ resource "aws_instance" "monitoring" {
   vpc_security_group_ids = setunion(
     setsubtract(var.monitoring_config.vpc_security_group_ids, [
       var.monitoring_security_group.id,
-      var.shared_ssh_security_group.id,
     ]),
     [aws_security_group.monitoring.id],
   )

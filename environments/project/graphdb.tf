@@ -31,7 +31,6 @@ resource "aws_instance" "graphdb" {
   vpc_security_group_ids = setunion(
     setsubtract(var.graphdb_config.vpc_security_group_ids, [
       var.graphdb_security_group.id,
-      var.shared_ssh_security_group.id,
     ]),
     [aws_security_group.graphdb.id],
   )
