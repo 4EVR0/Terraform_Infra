@@ -142,6 +142,8 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
 
+팀원의 plan 권한과 관리자 apply 권한 분리안은 [팀 Terraform 접근 권한 설계](docs/team-terraform-access.md) 참조.
+
 작업 이력은 [작업 기록](docs/worklog.md), 인벤토리 도구의 범위와 한계는 [조사 절차](docs/discovery-workflow.md) 참조.
 
 공용 상태 저장소 구성은 `bootstrap/state/`, 설계와 적용 순서는 [상태 저장소 설계](docs/state-backend.md) 참조. 사용자 실행으로 버킷 생성 및 두 상태 객체 저장 확인. 동시 실행 잠금, 별도 S3 객체 버전 복구와 격리된 Terraform state 복원 후 plan 검증 완료. 상세 시험은 [Terraform 상태 복구 검증](docs/verify-state-recovery.md) 참조.
