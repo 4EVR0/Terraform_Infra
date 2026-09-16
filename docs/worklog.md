@@ -747,3 +747,29 @@
 - 별도 PR에서 공용 SSH 그룹 연결 제거 예정
 
 세부 설계와 적용 절차는 [모니터링 서버 SSM 관리 경로 추가](enable-monitoring-ssm.md) 참조.
+
+## 2026-09-16 — 모니터링 공개 SSH 경로 분리 준비
+
+### 선행 조건
+
+- 모니터링 SSM 정책 연결과 Agent `Online` 확인 완료
+- SSM 원격 root 명령 성공과 기존 중지 상태 복구 완료
+- 공개 SSH 제거 후 사용할 독립적인 관리·복구 경로 확보
+
+### 구현과 검증
+
+- 모니터링 EC2에서 공용 SSH 보안 그룹 참조 제거
+- 모니터링 전용 보안 그룹 유지
+- 기존 보안 그룹 분리 계획 검사기로 대상과 그룹 집합을 검증
+- `terraform fmt -check -recursive`, `terraform validate`, Python 테스트 25개 통과
+- 최종 plan: **0 to add, 1 to change, 0 to destroy**
+- 모니터링 외 관리 자원 변경 없음 확인
+
+### 다음 작업
+
+- PR 병합 후 새 plan과 state 백업 생성 및 사용자 apply
+- 전용 보안 그룹만 남았는지와 공개 TCP 22 차단 확인
+- SSM root 명령 재검증 후 서버를 기존 중지 상태로 복구
+- 후속 plan의 `No changes` 확인
+
+세부 근거와 적용 게이트는 [모니터링 공개 SSH 경로 단계적 제거](harden-monitoring-ssh.md) 참조.

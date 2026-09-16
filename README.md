@@ -169,3 +169,5 @@ GraphDB EC2의 편입 준비, 발견된 user data 위험과 적용 선행 조건
 Airflow의 SSM 대체 경로 검증과 적용 게이트는 [Airflow 공개 SSH 경로 단계적 제거](docs/harden-airflow-ssh.md) 참조.
 
 모니터링의 SSM 권한 추가 근거와 검증 순서는 [모니터링 서버 SSM 관리 경로 추가](docs/enable-monitoring-ssm.md) 참조.
+
+모니터링의 공용 SSH 그룹 분리 근거와 적용 게이트는 [모니터링 공개 SSH 경로 단계적 제거](docs/harden-monitoring-ssh.md) 참조.
