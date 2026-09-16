@@ -102,6 +102,8 @@ Airflow는 기존 IAM 역할과 Ubuntu Snap SSM Agent를 이용한 root 명령 �
 
 Airflow의 공용 SSH 그룹 분리를 사용자 적용 완료. 전용 보안 그룹만 연결된 상태, 공용 SSH 경로 차단, SSM root 명령 채널, 기존 중지 상태 복구 및 후속 plan의 `No changes`를 확인.
 
+모니터링은 Tailscale 노드만 확인되고 현재 작업 장비의 지속 가능한 SSH 키 접속이 없어, 공개 SSH 제거 전에 SSM 관리 경로를 추가. 기존 IAM 역할에 AWS 관리형 SSM Core 정책 연결 한 건만 생성하는 `1 add, 0 change, 0 destroy` 계획을 검사기로 검증. 적용 후 Agent 온라인과 root 명령 채널을 확인하기 전까지 공용 SSH 연결 유지.
+
 ## 5. 운영 변경과 복구 검증
 
 - 태그 정리·접근 제한·백업 강화는 최초 편입과 분리한 변경 계획으로 진행

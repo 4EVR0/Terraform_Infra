@@ -720,3 +720,27 @@
 - Airflow를 기존 중지 상태로 복구하고 후속 plan에서 **No changes** 확인
 
 세부 근거와 적용 게이트는 [Airflow 공개 SSH 경로 단계적 제거](harden-airflow-ssh.md) 참조.
+
+## 2026-09-16 — 모니터링 SSM 관리 경로 준비
+
+### 배경과 선택
+
+- 모니터링 Tailscale 노드는 확인됐지만 현재 작업 장비의 지속 가능한 SSH 키 접속은 미확인
+- Ubuntu 24.04 기반 EC2와 IAM 인스턴스 프로파일은 있으나 SSM 정책 연결 없음
+- 공개 SSH 제거보다 SSM 관리 경로 추가와 실제 검증을 먼저 수행하기로 결정
+
+### 구현과 검증
+
+- 모니터링 IAM 역할에 AWS 관리형 SSM Core 정책 연결을 Terraform 자원으로 추가
+- 정확한 역할·정책 연결 한 건의 생성만 허용하는 plan 검사기와 테스트 추가
+- `terraform fmt -check -recursive`, `terraform validate`, Python 테스트 25개 통과
+- 최종 실제 plan: **1 to add, 0 to change, 0 to destroy**
+- 기존 관리 자원 변경 없음 확인
+
+### 다음 작업
+
+- PR 병합 후 새 plan과 state 백업 생성 및 사용자 apply
+- 모니터링 시작 후 SSM Agent 온라인과 root 명령 채널 확인
+- 검증 성공 시 별도 PR에서 공용 SSH 그룹 연결 제거
+
+세부 설계와 적용 절차는 [모니터링 서버 SSM 관리 경로 추가](enable-monitoring-ssm.md) 참조.
