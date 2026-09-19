@@ -18,3 +18,9 @@ output "backend_policies" {
   sensitive   = true
   value       = local.backend_policies
 }
+
+output "terraform_plan_role_arn" {
+  description = "ARN used by the local AWS CLI profile for MFA-protected Terraform plans."
+  sensitive   = true
+  value       = local.terraform_plan_role_arn
+}

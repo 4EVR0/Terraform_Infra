@@ -842,3 +842,40 @@
 - 별도 자격 증명으로 plan 성공과 apply 차단을 실제 검증
 
 세부 설계는 [팀 Terraform 접근 권한 설계](team-terraform-access.md) 참조.
+
+## 2026-09-19 — 지정 운영자용 Terraform 계획 역할 준비
+
+### 운영 방식 결정
+
+- 팀원 4명이 하나의 로그인 주체를 공유하던 방식 중단 결정
+- 팀원별 IAM 사용자와 MFA를 사용해 작업 주체와 이력을 구분
+- Terraform 실행은 초기 지정 운영자 한 명만 담당
+- 일반 팀원에게 project state 접근 권한을 부여하지 않고 담당 서비스 역할만 제공
+
+### 구현 범위
+
+- 지정 운영자 한 명만 전환 가능한 `TerraformPlanRole` 정의
+- 역할 신뢰 정책에 MFA 조건과 1시간 세션 제한 적용
+- project state 본문은 읽기만 허용하고 state 쓰기·삭제 제외
+- 동시 실행 제어에 필요한 project lock 객체만 생성·조회·삭제 허용
+- 현재 관리 자원의 EC2·IAM·S3 설정 조회 권한만 포함
+- 프로젝트 S3 객체 내용 조회와 인프라 변경 권한 제외
+- 기존 사용자 권한 축소와 적용 역할은 계획 역할 검증 후 별도 변경으로 분리
+
+### 구현 검증
+
+- `terraform fmt -check -recursive` 통과
+- Terraform 단위 테스트 2개와 Python 테스트 37개 통과
+- 실제 원격 state 기준 저장 plan: **3 to add, 0 to change, 0 to destroy**
+- IAM 역할·역할 인라인 정책·운영자 역할 전환 정책 외 다른 관리 자원 변경 없음 확인
+- MFA 조건, state 쓰기 차단, S3 데이터 객체 조회 차단 자동 검사 통과
+- AWS Access Analyzer 정책 검사 경고 0건
+
+### 적용 후 확인할 항목
+
+- 지정 운영자 MFA 등록
+- 별도 역할 자격 증명으로 `terraform plan` 성공 확인
+- project state 쓰기와 실제 인프라 변경 요청 거부 확인
+- 프로젝트 S3 데이터 객체 읽기와 bootstrap state 접근 거부 확인
+
+세부 운영 구조는 [팀 Terraform 접근 권한 설계](team-terraform-access.md) 참조.
