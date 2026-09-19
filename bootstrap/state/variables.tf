@@ -44,3 +44,46 @@ variable "terraform_plan_s3_bucket_arns" {
     error_message = "terraform_plan_s3_bucket_arns must contain at least one valid S3 bucket ARN."
   }
 }
+
+variable "terraform_apply_resources" {
+  description = "Existing project resource ARNs that the Terraform apply role may change. Keep actual ARNs in ignored local tfvars."
+  type = object({
+    ec2_instance_arns          = set(string)
+    ec2_volume_arns            = set(string)
+    ec2_security_group_arns    = set(string)
+    iam_role_arns              = set(string)
+    iam_instance_profile_arns  = set(string)
+    iam_customer_policy_arns   = set(string)
+    iam_attachable_policy_arns = set(string)
+    s3_bucket_arns             = set(string)
+  })
+  nullable = false
+
+  validation {
+    condition = alltrue([
+      length(var.terraform_apply_resources.ec2_instance_arns) > 0,
+      length(var.terraform_apply_resources.ec2_volume_arns) > 0,
+      length(var.terraform_apply_resources.ec2_security_group_arns) > 0,
+      length(var.terraform_apply_resources.iam_role_arns) > 0,
+      length(var.terraform_apply_resources.iam_instance_profile_arns) > 0,
+      length(var.terraform_apply_resources.iam_customer_policy_arns) > 0,
+      length(var.terraform_apply_resources.iam_attachable_policy_arns) > 0,
+      length(var.terraform_apply_resources.s3_bucket_arns) > 0,
+    ])
+    error_message = "terraform_apply_resources must contain every reviewed project resource category."
+  }
+
+  validation {
+    condition = alltrue(concat(
+      [for arn in var.terraform_apply_resources.ec2_instance_arns : can(regex("^arn:[^:]+:ec2:[^:]+:[0-9]{12}:instance/i-[0-9a-f]{8,17}$", arn))],
+      [for arn in var.terraform_apply_resources.ec2_volume_arns : can(regex("^arn:[^:]+:ec2:[^:]+:[0-9]{12}:volume/vol-[0-9a-f]{8,17}$", arn))],
+      [for arn in var.terraform_apply_resources.ec2_security_group_arns : can(regex("^arn:[^:]+:ec2:[^:]+:[0-9]{12}:security-group/sg-[0-9a-f]{8,17}$", arn))],
+      [for arn in var.terraform_apply_resources.iam_role_arns : can(regex("^arn:[^:]+:iam::[0-9]{12}:role/.+$", arn)) && !strcontains(arn, "*")],
+      [for arn in var.terraform_apply_resources.iam_instance_profile_arns : can(regex("^arn:[^:]+:iam::[0-9]{12}:instance-profile/.+$", arn)) && !strcontains(arn, "*")],
+      [for arn in var.terraform_apply_resources.iam_customer_policy_arns : can(regex("^arn:[^:]+:iam::[0-9]{12}:policy/.+$", arn)) && !strcontains(arn, "*")],
+      [for arn in var.terraform_apply_resources.iam_attachable_policy_arns : can(regex("^arn:[^:]+:iam::(aws|[0-9]{12}):policy/.+$", arn)) && !strcontains(arn, "*")],
+      [for arn in var.terraform_apply_resources.s3_bucket_arns : can(regex("^arn:[^:]+:s3:::[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$", arn))],
+    ))
+    error_message = "terraform_apply_resources must contain explicit ARNs of the expected resource types; wildcard ARNs are not allowed."
+  }
+}
