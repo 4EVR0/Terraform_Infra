@@ -72,12 +72,18 @@ AWS_PROFILE=terraform-apply aws sts get-caller-identity
 Terraform 프로세스에는 MFA로 발급한 역할 임시 자격 증명 사용. 장기 액세스 키나 역할 세션 값을 저장소에 기록하지 않음.
 
 ```bash
-aws configure export-credentials \
+eval "$(aws configure export-credentials \
   --profile terraform-apply \
-  --format env
+  --format env)"
 ```
 
-현재 셸에 임시 자격 증명을 설정한 뒤 검토한 저장 plan만 적용.
+이 명령은 AWS CLI가 발급한 임시 자격 증명을 현재 셸에만 설정. Terraform의 AWS SDK는 MFA 번호를 직접 요청하지 못하므로 `AWS_PROFILE=terraform-apply`만 지정하면 실행에 실패할 수 있음.
+
+호출 주체를 다시 확인한 뒤 검토한 저장 plan만 적용.
+
+```bash
+aws sts get-caller-identity
+```
 
 ```bash
 .local/bin/terraform -chdir=environments/project apply \
@@ -85,6 +91,12 @@ aws configure export-credentials \
 ```
 
 적용 후 같은 역할 세션에서 새 plan을 생성해 의도한 변경 외 차이가 없는지 확인. 작업 기록에는 plan 요약, 적용 결과, 후속 plan 결과와 복구 지점을 남김.
+
+작업을 마치면 현재 셸에서 임시 자격 증명을 제거.
+
+```bash
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_CREDENTIAL_EXPIRATION
+```
 
 ## 한계
 
