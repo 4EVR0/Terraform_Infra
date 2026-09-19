@@ -9,6 +9,16 @@ variables {
   state_bucket_name             = "example-test-terraform-state"
   terraform_operator_user_name  = "example-operator"
   terraform_plan_s3_bucket_arns = ["arn:aws:s3:::example-project-bucket"]
+  terraform_apply_resources = {
+    ec2_instance_arns          = ["arn:aws:ec2:ap-northeast-2:000000000000:instance/i-00000000000000000"]
+    ec2_volume_arns            = ["arn:aws:ec2:ap-northeast-2:000000000000:volume/vol-00000000000000000"]
+    ec2_security_group_arns    = ["arn:aws:ec2:ap-northeast-2:000000000000:security-group/sg-00000000000000000"]
+    iam_role_arns              = ["arn:aws:iam::000000000000:role/example-role"]
+    iam_instance_profile_arns  = ["arn:aws:iam::000000000000:instance-profile/example-profile"]
+    iam_customer_policy_arns   = ["arn:aws:iam::000000000000:policy/example-policy"]
+    iam_attachable_policy_arns = ["arn:aws:iam::aws:policy/example-policy"]
+    s3_bucket_arns             = ["arn:aws:s3:::example-project-bucket"]
+  }
 }
 
 run "protect_plan_role" {
@@ -35,6 +45,33 @@ run "protect_plan_role" {
       if try(statement.Action == "s3:DeleteObject", false) || try(contains(statement.Action, "s3:DeleteObject"), false)
     ] == ["ManageProjectStateLock"]
     error_message = "The plan role may delete only the project lock object."
+  }
+}
+
+run "protect_apply_role" {
+  command = plan
+
+  assert {
+    condition     = aws_iam_role.terraform_apply.max_session_duration == 3600
+    error_message = "The Terraform apply role session must remain limited to one hour."
+  }
+  assert {
+    condition     = jsondecode(aws_iam_role.terraform_apply.assume_role_policy).Statement[0].Condition.Bool["aws:MultiFactorAuthPresent"] == "true"
+    error_message = "The Terraform apply role must require MFA."
+  }
+  assert {
+    condition = one([
+      for statement in jsondecode(aws_iam_role_policy.terraform_apply.policy).Statement : statement
+      if statement.Sid == "WriteProjectState"
+    ]).Action == "s3:PutObject"
+    error_message = "The apply role may write the project state with PutObject only."
+  }
+  assert {
+    condition = contains(one([
+      for statement in jsondecode(aws_iam_role_policy.terraform_apply.policy).Statement : statement
+      if statement.Sid == "DenyResourceReplacementAndDeletion"
+    ]).Action, "ec2:TerminateInstances")
+    error_message = "The apply role must explicitly deny EC2 termination."
   }
 }
 

@@ -6,3 +6,14 @@ terraform_operator_user_name = "<IAM_USER_NAME>"
 terraform_plan_s3_bucket_arns = [
   "arn:aws:s3:::<PROJECT_BUCKET_NAME>",
 ]
+
+terraform_apply_resources = {
+  ec2_instance_arns          = ["arn:aws:ec2:<REGION>:<AWS_ACCOUNT_ID>:instance/<INSTANCE_ID>"]
+  ec2_volume_arns            = ["arn:aws:ec2:<REGION>:<AWS_ACCOUNT_ID>:volume/<VOLUME_ID>"]
+  ec2_security_group_arns    = ["arn:aws:ec2:<REGION>:<AWS_ACCOUNT_ID>:security-group/<SECURITY_GROUP_ID>"]
+  iam_role_arns              = ["arn:aws:iam::<AWS_ACCOUNT_ID>:role/<ROLE_NAME>"]
+  iam_instance_profile_arns  = ["arn:aws:iam::<AWS_ACCOUNT_ID>:instance-profile/<PROFILE_NAME>"]
+  iam_customer_policy_arns   = ["arn:aws:iam::<AWS_ACCOUNT_ID>:policy/<POLICY_NAME>"]
+  iam_attachable_policy_arns = ["arn:aws:iam::aws:policy/<AWS_MANAGED_POLICY_NAME>"]
+  s3_bucket_arns             = ["arn:aws:s3:::<PROJECT_BUCKET_NAME>"]
+}

@@ -884,3 +884,33 @@
 - 드리프트를 포함한 변경 plan은 `prevent_destroy`에 의해 중단됐으며 실제 인프라 변경 없음
 
 세부 운영 구조는 [팀 Terraform 접근 권한 설계](team-terraform-access.md) 참조.
+
+## 2026-09-20 — 제한된 Terraform 적용 역할 준비
+
+### 설계 선택
+
+- 지정 운영자만 MFA가 확인된 1시간 세션으로 역할 전환
+- 계획 역할의 조회 범위에 project state 쓰기와 검토된 자원 변경 권한 추가
+- 실제 자원 ARN은 Git 제외 입력에서만 관리
+- 일반적인 인플레이스 변경과 보안 그룹 규칙·IAM 정책 연결 변경 지원
+- 새 자원 생성과 기존 주요 자원 삭제·교체는 별도 검토 대상으로 분리
+
+### 방어 조건
+
+- EC2 인스턴스와 종속 네트워크·볼륨 생성 및 삭제 명시적 거부
+- IAM 역할·인스턴스 프로파일·관리형 정책 생성 및 삭제 명시적 거부
+- S3 버킷 생성·삭제와 project state 삭제 명시적 거부
+- bootstrap state 읽기·쓰기·삭제 명시적 거부
+- `iam:PassRole`은 검토된 역할과 EC2 서비스로 제한
+- 관리형 정책 연결 변경은 검토된 역할과 정책 ARN 조합으로 제한
+
+### 사전 검증
+
+- `terraform validate` 통과
+- Terraform 단위 테스트 3개 통과
+- 전체 Python 테스트 44개 통과
+- 실제 원격 state 기준 저장 plan: **3 to add, 0 to change, 0 to destroy**
+- AWS Access Analyzer 정책 검사 경고 0건
+- 저장 plan 전용 검사에서 IAM 역할·역할 정책·운영자 전환 정책 세 개 외 mutation 없음 확인
+
+팀원의 임시 인프라 테스트가 끝나기 전에는 프로젝트 apply를 실행하지 않음. 세부 절차는 [Terraform 적용 역할 사용 절차](use-terraform-apply-role.md) 참조.
