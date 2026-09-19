@@ -106,6 +106,17 @@ IAM 사용자 자체를 Terraform으로 만들 수 있지만 초기 비밀번호
 
 계획 역할의 권한 범위와 로컬 프로파일 설정, 적용 후 차단 시험은 [Terraform 계획 역할 사용 절차](use-terraform-plan-role.md) 참조.
 
+## 계획 역할 검증 결과
+
+- 지정 운영자 MFA 등록과 역할 전환 성공
+- project state 읽기와 project lock 관리 허용 확인
+- 현재 Terraform 관리 자원의 설정 조회 성공
+- project state 쓰기와 bootstrap state 접근 거부 확인
+- 프로젝트 S3 데이터 객체 읽기와 EC2 변경 요청 거부 확인
+- 실제 적용 권한은 포함하지 않은 상태 유지
+
+프로젝트 plan에서 별도로 발견한 팀원의 임시 네트워크 변경은 역할 권한 문제와 분리. 테스트 종료 후 코드 기준 상태로 복구하고 plan을 다시 확인.
+
 ## 적용 전 확인 항목
 
 - 개인별 IAM 사용자와 담당 역할 명단
