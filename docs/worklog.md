@@ -873,9 +873,14 @@
 
 ### 적용 후 확인할 항목
 
-- 지정 운영자 MFA 등록
-- 별도 역할 자격 증명으로 `terraform plan` 성공 확인
-- project state 쓰기와 실제 인프라 변경 요청 거부 확인
-- 프로젝트 S3 데이터 객체 읽기와 bootstrap state 접근 거부 확인
+- 사용자 적용 결과: **3 added, 0 changed, 0 destroyed**
+- 지정 운영자 MFA 등록과 1시간 역할 세션 전환 성공
+- 적용 후 bootstrap plan에서 **No changes** 확인
+- 역할 세션으로 project state와 현재 관리 자원 전체 조회 성공
+- project state 읽기와 project lock 쓰기 허용 확인
+- project state 쓰기, bootstrap state 읽기, 프로젝트 S3 데이터 객체 읽기, EC2 변경 요청 거부 확인
+- 권한 검증 중 팀원이 진행 중인 임시 EC2 네트워크 변경 감지
+- 해당 변경은 테스트 종료 전까지 유지하고 Terraform 영구 구성에는 반영하지 않기로 결정
+- 드리프트를 포함한 변경 plan은 `prevent_destroy`에 의해 중단됐으며 실제 인프라 변경 없음
 
 세부 운영 구조는 [팀 Terraform 접근 권한 설계](team-terraform-access.md) 참조.
