@@ -1070,6 +1070,7 @@ Terraform이 MFA 입력을 직접 처리하지 못하는 제약을 실제 실행
 
 ### 운영 후속
 
-- PR에서 GitHub Actions 실제 실행 결과 확인
-- 최초 성공 후 branch protection의 필수 검사 등록 검토
+- 수정된 PR의 GitHub Actions 실제 실행 결과: **25초, 성공**
+- main branch protection에 `Format, validate, and test` 필수 검사 등록
+- 최신 main 기준 검사 요구, force push·branch 삭제 금지 확인
 - 실제 AWS plan은 향후 OIDC 읽기 전용 역할을 사용하는 별도 workflow로 분리

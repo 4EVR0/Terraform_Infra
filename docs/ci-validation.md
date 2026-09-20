@@ -53,6 +53,7 @@ python3 -m unittest discover -s tests -v
 
 ## 운영 적용
 
-- 최초 workflow 성공 확인 후 저장소 branch protection에서 `Format, validate, and test`를 필수 검사로 지정
+- GitHub runner의 최초 성공 확인 후 main branch protection에서 `Format, validate, and test`를 필수 검사로 지정
+- 최신 main 기준 검사를 요구하며 force push와 branch 삭제를 허용하지 않음
 - 검사 실패 시 로그에서 최초 실패 단계를 확인하고 같은 명령을 로컬에서 재현
 - 실제 AWS plan 자동화는 OIDC 읽기 전용 역할을 사용하는 별도 workflow로 분리
