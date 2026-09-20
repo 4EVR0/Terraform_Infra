@@ -23,8 +23,8 @@
 - MFA 기반 비상 관리자 역할과 state·핵심 IAM 삭제 방지 조건 검증 완료
 - 운영자 IAM 사용자의 상시 `AdministratorAccess` 제거 완료
 - 현재 project plan은 팀원의 임시 EC2 네트워크 테스트 변경을 감지하며, 테스트 종료 후 정리·재검증 예정
-- 진행 중인 작업: 나머지 팀원의 개인 IAM 사용자·MFA와 담당 역할 범위 확정
-- 아직 수행하지 않은 작업: 팀원별 권한 적용과 인벤토리 누락 범위 확인
+- 진행 중인 작업: 세 팀원용 MFA 기반 공통 관리자 역할 준비
+- 아직 수행하지 않은 작업: 팀원 MFA 역할 전환 검증과 인벤토리 누락 범위 확인
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -155,6 +155,8 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 지정 운영자용 적용 역할의 권한 범위와 적용 게이트는 [Terraform 적용 역할 사용 절차](docs/use-terraform-apply-role.md) 참조.
 
 비상 관리자 역할의 사용 조건과 상시 관리자 권한 제거 게이트는 [Terraform 비상 관리자 역할 사용 절차](docs/use-terraform-bootstrap-admin-role.md) 참조.
+
+팀 공통 관리자 역할의 MFA 등록과 콘솔·CLI 사용 절차는 [팀 공통 관리자 역할 사용 절차](docs/use-team-admin-role.md) 참조.
 
 작업 이력은 [작업 기록](docs/worklog.md), 인벤토리 도구의 범위와 한계는 [조사 절차](docs/discovery-workflow.md) 참조.
 
