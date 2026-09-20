@@ -148,6 +148,8 @@ Terraform 마이그레이션의 필수 작업은 완료. 이후 작업은 새로
 
 PR에서 자동 실행되는 형식·구성·회귀 검사의 범위와 로컬 재현 방법은 [Terraform PR 자동 검증](docs/ci-validation.md) 참조.
 
+마이그레이션 이후 CI 검증·읽기 전용 plan·drift 탐지와 포트폴리오 문서화의 우선순위는 [Terraform 포트폴리오 고도화 로드맵](docs/terraform-portfolio-roadmap.md) 참조.
+
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
 
 팀원의 plan 권한과 관리자 apply 권한 분리안은 [팀 Terraform 접근 권한 설계](docs/team-terraform-access.md) 참조.
