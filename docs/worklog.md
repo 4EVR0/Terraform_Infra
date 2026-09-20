@@ -961,3 +961,16 @@ Terraform이 MFA 입력을 직접 처리하지 못하는 제약을 실제 실행
 - 실제 원격 state 기준 저장 plan: **4 to add, 0 to change, 0 to destroy**
 - AWS Access Analyzer에서 신뢰 정책·삭제 방지 정책·역할 전환 정책 findings 0건
 - 저장 plan 전용 검사에서 역할·관리자 정책 연결·삭제 방지 정책·운영자 역할 전환 정책 외 mutation 없음 확인
+
+### 적용과 권한 전환 결과
+
+- 사용자 적용 결과: **4 added, 0 changed, 0 destroyed**
+- 적용 후 bootstrap plan에서 **No changes** 확인
+- 지정 운영자의 MFA 비상 관리자 역할 전환 성공
+- 실제 역할 세션으로 bootstrap state 버전, Terraform state와 IAM 조회 성공
+- state 경로와 분리한 임시 객체의 생성·암호화·삭제와 전체 버전 정리 완료
+- 정책 시뮬레이션에서 state 객체·과거 버전·버킷과 핵심 IAM 삭제 명시적 거부 확인
+- 루트 계정 MFA 활성화와 루트 액세스 키 부재 확인
+- 운영자를 상시 관리자 그룹에서 제거하고 역할 전환 정책 유지 확인
+- 운영자 직접 권한으로 IAM 역할 생성, EC2 종료와 S3 버킷 삭제가 거부되는 상태 확인
+- 비상 관리자 역할 세션으로 실행한 최종 bootstrap plan에서 **No changes** 확인
