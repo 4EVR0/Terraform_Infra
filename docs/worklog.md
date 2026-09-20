@@ -935,3 +935,29 @@
 - 정책 시뮬레이션만 사용해 실제 운영 자원 변경 없음
 
 Terraform이 MFA 입력을 직접 처리하지 못하는 제약을 실제 실행에서 확인해, AWS CLI가 발급한 임시 자격 증명을 현재 셸에 전달하는 절차를 사용 문서에 추가.
+
+## 2026-09-20 — MFA 기반 Terraform 비상 관리자 역할 준비
+
+### 배경
+
+- 운영자 IAM 사용자가 상시 `AdministratorAccess`를 보유한 상태 확인
+- PlanRole과 ApplyRole만으로는 bootstrap state, IAM 복구와 새 자원 생성 불가
+- 상시 관리자 권한을 제거하기 전에 MFA 기반 비상 복구 경로 필요
+
+### 설계
+
+- 지정 운영자 한 명만 MFA로 전환 가능한 1시간 관리자 역할 추가
+- AWS 관리형 `AdministratorAccess`를 역할 세션에만 연결
+- bootstrap·project state 객체와 과거 버전, state 버킷 삭제 명시적 거부
+- 세 Terraform 역할과 지정 운영자 IAM 사용자 삭제 명시적 거부
+- 일반 plan·apply와 비상 관리자 사용 절차 분리
+
+### 사전 검증
+
+- `terraform validate` 통과
+- Terraform 단위 테스트 4개 통과
+- 전체 Python 테스트 50개 통과
+- 저장 plan의 변경 대상을 네 IAM 자원으로 제한하는 전용 검사기 추가
+- 실제 원격 state 기준 저장 plan: **4 to add, 0 to change, 0 to destroy**
+- AWS Access Analyzer에서 신뢰 정책·삭제 방지 정책·역할 전환 정책 findings 0건
+- 저장 plan 전용 검사에서 역할·관리자 정책 연결·삭제 방지 정책·운영자 역할 전환 정책 외 mutation 없음 확인

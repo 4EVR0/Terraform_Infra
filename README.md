@@ -19,10 +19,10 @@
 - 파이프라인 백업: 30일 보존 후 2026-10-17 삭제 여부 재검토 태그 적용
 - 완료된 공용 자원 편입: 프로젝트 공용 SSH 보안 그룹과 규칙 2개. 원격 state 등록 및 `No changes` 확인
 - 공용 SSH 정리 완료: 마지막 사용처 제거 후 그룹과 규칙 세 개 삭제, 후속 `No changes` 확인
-- 지정 운영자용 Terraform 계획 역할 적용·MFA 전환·허용 및 차단 권한 검증 완료
+- 지정 운영자용 Terraform 계획·적용 역할의 적용, MFA 전환과 권한 경계 검증 완료
 - 현재 project plan은 팀원의 임시 EC2 네트워크 테스트 변경을 감지하며, 테스트 종료 후 정리·재검증 예정
-- 진행 중인 작업: 지정 운영자용 제한된 Terraform 적용 역할 준비
-- 아직 수행하지 않은 작업: 적용 역할 실제 검증과 인벤토리 누락 범위 확인
+- 진행 중인 작업: 상시 관리자 권한을 대체할 MFA 기반 비상 관리자 역할 준비
+- 아직 수행하지 않은 작업: 비상 관리자 역할·복구 절차 검증, 상시 관리자 권한 제거와 인벤토리 누락 범위 확인
 - 전체 AWS 인벤토리 완료 여부: **미완료**. 다른 리전·추가 서비스·권한 정책 세부 조사 필요
 
 검증 결과:
@@ -139,9 +139,10 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 ## 다음 작업
 
 1. 공유 로그인을 개인별 IAM 사용자와 MFA로 전환
-2. 지정 운영자용 계획 역할 생성과 차단 조건 검증
-3. 계획 역할 검증 후 적용 역할을 별도 변경으로 설계
-4. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
+2. 지정 운영자용 계획·적용 역할 생성과 권한 경계 검증
+3. 비상 관리자 역할과 복구 절차 검증 후 상시 관리자 권한 제거
+4. 나머지 팀원의 개인 IAM 사용자·MFA와 담당 역할 구성
+5. 인벤토리 누락 범위 조사 및 공유 자원 경계 확정
 
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
 
@@ -150,6 +151,8 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 지정 운영자용 계획 역할의 준비·사용·차단 검증 순서는 [Terraform 계획 역할 사용 절차](docs/use-terraform-plan-role.md) 참조.
 
 지정 운영자용 적용 역할의 권한 범위와 적용 게이트는 [Terraform 적용 역할 사용 절차](docs/use-terraform-apply-role.md) 참조.
+
+비상 관리자 역할의 사용 조건과 상시 관리자 권한 제거 게이트는 [Terraform 비상 관리자 역할 사용 절차](docs/use-terraform-bootstrap-admin-role.md) 참조.
 
 작업 이력은 [작업 기록](docs/worklog.md), 인벤토리 도구의 범위와 한계는 [조사 절차](docs/discovery-workflow.md) 참조.
 

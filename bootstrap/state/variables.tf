@@ -22,7 +22,7 @@ variable "state_bucket_name" {
 }
 
 variable "terraform_operator_user_name" {
-  description = "Existing human IAM user allowed to assume the MFA-protected Terraform plan role. Set through ignored local tfvars."
+  description = "Existing human IAM user allowed to assume the MFA-protected Terraform roles. Set through ignored local tfvars."
   type        = string
   nullable    = false
 

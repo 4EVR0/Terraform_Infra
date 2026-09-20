@@ -30,3 +30,9 @@ output "terraform_apply_role_arn" {
   sensitive   = true
   value       = local.terraform_apply_role_arn
 }
+
+output "terraform_bootstrap_admin_role_arn" {
+  description = "ARN used by the local AWS CLI profile for MFA-protected bootstrap recovery and emergency administration."
+  sensitive   = true
+  value       = local.terraform_bootstrap_admin_role_arn
+}
