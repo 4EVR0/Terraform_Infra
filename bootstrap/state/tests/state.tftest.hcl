@@ -75,6 +75,37 @@ run "protect_apply_role" {
   }
 }
 
+run "protect_bootstrap_admin_role" {
+  command = plan
+
+  assert {
+    condition     = aws_iam_role.terraform_bootstrap_admin.max_session_duration == 3600
+    error_message = "The Terraform bootstrap administrator session must remain limited to one hour."
+  }
+  assert {
+    condition     = jsondecode(aws_iam_role.terraform_bootstrap_admin.assume_role_policy).Statement[0].Condition.Bool["aws:MultiFactorAuthPresent"] == "true"
+    error_message = "The Terraform bootstrap administrator role must require MFA."
+  }
+  assert {
+    condition     = aws_iam_role_policy_attachment.terraform_bootstrap_admin.policy_arn == "arn:aws:iam::aws:policy/AdministratorAccess"
+    error_message = "The emergency administrator role must use the reviewed AWS AdministratorAccess policy."
+  }
+  assert {
+    condition = contains(one([
+      for statement in jsondecode(aws_iam_role_policy.terraform_bootstrap_admin_guardrail.policy).Statement : statement
+      if statement.Sid == "DenyStateDeletion"
+    ]).Action, "s3:DeleteObjectVersion")
+    error_message = "The bootstrap administrator guardrail must deny deletion of state object versions."
+  }
+  assert {
+    condition = one([
+      for statement in jsondecode(aws_iam_role_policy.terraform_bootstrap_admin_guardrail.policy).Statement : statement
+      if statement.Sid == "DenyStateBucketDeletion"
+    ]).Action == "s3:DeleteBucket"
+    error_message = "The bootstrap administrator guardrail must deny state bucket deletion."
+  }
+}
+
 run "protect_state_storage" {
   command = plan
 
