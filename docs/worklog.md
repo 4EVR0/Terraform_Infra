@@ -1061,6 +1061,13 @@ Terraform이 MFA 입력을 직접 처리하지 못하는 제약을 실제 실행
 - bootstrap 테스트 **5 passed, 0 failed**
 - 원격 backend 접근과 AWS API 호출 없이 검증 완료
 
+### GitHub runner 1차 실행과 수정
+
+- 최초 PR 실행에서 AWS provider 설치 후 Linux 패키지 체크섬 불일치로 `validate` 실패
+- 기존 lock 파일에 개발 장비의 macOS용 체크섬만 기록된 것이 원인
+- 공식 Terraform Registry 서명 검증을 거쳐 macOS ARM과 Linux AMD64 체크섬을 두 lock 파일에 함께 기록
+- provider 버전과 구성은 변경하지 않고 플랫폼별 무결성 정보만 보완
+
 ### 운영 후속
 
 - PR에서 GitHub Actions 실제 실행 결과 확인

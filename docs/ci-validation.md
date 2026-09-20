@@ -25,6 +25,7 @@
 5. Python plan 검사기 회귀 테스트
 
 Terraform과 Python 버전을 명시하고 외부 GitHub Action은 전체 commit SHA로 고정.
+두 Terraform lock 파일에는 개발 장비의 macOS ARM과 GitHub runner의 Linux AMD64 provider 체크섬을 함께 기록.
 
 ## 보안 경계
 
