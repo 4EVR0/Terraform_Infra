@@ -1,5 +1,7 @@
 # 4EVR0 Terraform 마이그레이션
 
+[![Terraform checks](https://github.com/4EVR0/Terraform_Infra/actions/workflows/terraform-checks.yml/badge.svg)](https://github.com/4EVR0/Terraform_Infra/actions/workflows/terraform-checks.yml)
+
 프로젝트에서 사용하는 AWS 인프라 전체를 코드로 관리하기 위한 작업 공간.
 첫 목표는 **기존 자원의 재생성 없이 Terraform 관리 대상으로 편입**. 이후 변경 이력 관리와 장애 복구 검증으로 확장.
 
@@ -143,6 +145,8 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 ## 다음 작업
 
 Terraform 마이그레이션의 필수 작업은 완료. 이후 작업은 새로운 자원을 추가할 때 [AWS 인벤토리 관리 경계](docs/aws-management-boundary.md)를 갱신하고, 필요에 따라 정기 drift 탐지와 서비스 복구 시험을 별도 운영 개선으로 진행.
+
+PR에서 자동 실행되는 형식·구성·회귀 검사의 범위와 로컬 재현 방법은 [Terraform PR 자동 검증](docs/ci-validation.md) 참조.
 
 세부 작업과 판단 기준은 [마이그레이션 계획](docs/migration-plan.md) 참조. 상세 인벤토리는 별도 로컬 문서에서 확인.
 

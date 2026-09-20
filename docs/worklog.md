@@ -1032,3 +1032,37 @@ Terraform이 MFA 입력을 직접 처리하지 못하는 제약을 실제 실행
 - 모든 발견 자원을 import하는 대신 변경 책임에 따라 관리·조회·외부 관리·제외로 분류
 - 기존 마이그레이션 계획의 자원 목록과 소유 범위 확인 항목 완료 처리
 - 알려진 운영 예외에서는 project plan에 네트워크 차이가 남을 수 있음을 문서화
+
+## 2026-09-20 — Terraform PR 정적 검증 자동화
+
+### 목적과 설계
+
+- 로컬 형식·구성·회귀 검사를 pull request의 공통 품질 게이트로 전환
+- AWS 자격 증명과 원격 state 없이 실행되는 정적 검증으로 범위 제한
+- Terraform 1.16.1과 Python 3.13 사용
+- 외부 GitHub Action을 검토한 릴리스의 전체 commit SHA로 고정
+- 저장소 읽기 권한만 부여하고 동일 PR의 이전 실행을 자동 취소
+
+### 검증 범위
+
+- 전체 Terraform 구성의 `fmt -check -recursive`
+- bootstrap과 project의 `init -backend=false -lockfile=readonly` 및 `validate`
+- mock AWS provider를 사용하는 bootstrap `terraform test`
+- Python plan 검사기 회귀 테스트
+- 모든 PR·main push와 수동 실행 지원. 필수 검사 지정 시 문서 변경 PR에서도 상태가 누락되지 않도록 경로 필터 미사용
+
+### 로컬 검증
+
+- YAML 구문 검사 통과
+- Terraform 형식 검사 통과
+- Python 테스트 **56 passed**
+- 깨끗한 임시 checkout에서 AWS provider 6.63.0 신규 설치 후 bootstrap·project 초기화 성공
+- 두 Terraform 구성의 `validate` 통과
+- bootstrap 테스트 **5 passed, 0 failed**
+- 원격 backend 접근과 AWS API 호출 없이 검증 완료
+
+### 운영 후속
+
+- PR에서 GitHub Actions 실제 실행 결과 확인
+- 최초 성공 후 branch protection의 필수 검사 등록 검토
+- 실제 AWS plan은 향후 OIDC 읽기 전용 역할을 사용하는 별도 workflow로 분리
