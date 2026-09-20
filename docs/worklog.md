@@ -974,3 +974,30 @@ Terraform이 MFA 입력을 직접 처리하지 못하는 제약을 실제 실행
 - 운영자를 상시 관리자 그룹에서 제거하고 역할 전환 정책 유지 확인
 - 운영자 직접 권한으로 IAM 역할 생성, EC2 종료와 S3 버킷 삭제가 거부되는 상태 확인
 - 비상 관리자 역할 세션으로 실행한 최종 bootstrap plan에서 **No changes** 확인
+
+## 2026-09-20 — 팀 공통 관리자 역할 준비
+
+### 운영 판단
+
+- 팀원의 담당 영역이 고정되지 않고 필요에 따라 여러 AWS 자원을 함께 운영
+- 초기에는 서비스별 세분화 역할보다 공통 관리자 역할을 사용하기로 결정
+- 개인 IAM 사용자에 직접 관리자 정책을 연결하지 않고 MFA 임시 역할 세션 사용
+- Terraform 운영자 계정과 세 Terraform 역할은 팀 공통 관리자 범위에서 제외
+
+### 구현 범위
+
+- Git 제외 입력에 등록된 세 팀원만 신뢰하는 `4EVR0TeamAdminRole` 추가
+- MFA 조건을 유지하고 팀 운영 편의와 관리자 권한 노출 시간을 고려해 최대 2시간 세션 적용
+- AWS 관리형 `AdministratorAccess`를 역할에 연결
+- 본인 비밀번호·MFA 관리와 역할 전환만 제공하는 `4EVR0TeamUsers` 그룹 추가
+- state·Terraform 역할·Terraform 운영자 변경 차단 정책 추가
+- 팀원 변경 시 그룹 구성과 역할 신뢰 주체를 함께 갱신하도록 전용 plan 검사기 추가
+
+### 사전 검증
+
+- `terraform validate` 통과
+- Terraform 단위 테스트 5개 통과
+- 전체 Python 테스트 56개 통과
+- 실제 원격 state 기준 저장 plan: **6 to add, 0 to change, 0 to destroy**
+- 저장 plan 전용 검사에서 팀 그룹·그룹 정책·멤버십과 역할·관리자 정책 연결·보호 정책 외 mutation 없음 확인
+- AWS Access Analyzer에서 역할 신뢰·보호·사용자 기본 정책 findings 0건

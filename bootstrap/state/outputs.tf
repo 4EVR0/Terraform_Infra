@@ -36,3 +36,9 @@ output "terraform_bootstrap_admin_role_arn" {
   sensitive   = true
   value       = local.terraform_bootstrap_admin_role_arn
 }
+
+output "team_admin_role_arn" {
+  description = "ARN used by named team members for MFA-protected temporary administrator sessions."
+  sensitive   = true
+  value       = local.team_admin_role_arn
+}

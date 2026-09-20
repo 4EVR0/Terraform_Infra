@@ -3,6 +3,7 @@ aws_region        = "ap-northeast-2"
 state_bucket_name = "<GLOBALLY_UNIQUE_STATE_BUCKET_NAME>"
 
 terraform_operator_user_name = "<IAM_USER_NAME>"
+team_admin_user_names        = ["<TEAM_MEMBER_IAM_USER_NAME>"]
 terraform_plan_s3_bucket_arns = [
   "arn:aws:s3:::<PROJECT_BUCKET_NAME>",
 ]

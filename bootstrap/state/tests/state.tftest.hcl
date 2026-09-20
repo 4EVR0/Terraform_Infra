@@ -8,6 +8,7 @@ variables {
   aws_account_id                = "000000000000"
   state_bucket_name             = "example-test-terraform-state"
   terraform_operator_user_name  = "example-operator"
+  team_admin_user_names         = ["example-team-user-a", "example-team-user-b"]
   terraform_plan_s3_bucket_arns = ["arn:aws:s3:::example-project-bucket"]
   terraform_apply_resources = {
     ec2_instance_arns          = ["arn:aws:ec2:ap-northeast-2:000000000000:instance/i-00000000000000000"]
@@ -103,6 +104,38 @@ run "protect_bootstrap_admin_role" {
       if statement.Sid == "DenyStateBucketDeletion"
     ]).Action == "s3:DeleteBucket"
     error_message = "The bootstrap administrator guardrail must deny state bucket deletion."
+  }
+}
+
+run "protect_team_admin_role" {
+  command = plan
+
+  assert {
+    condition     = aws_iam_role.team_admin.max_session_duration == 7200
+    error_message = "The shared team administrator role session must remain limited to two hours."
+  }
+  assert {
+    condition     = jsondecode(aws_iam_role.team_admin.assume_role_policy).Statement[0].Condition.Bool["aws:MultiFactorAuthPresent"] == "true"
+    error_message = "The shared team administrator role must require MFA."
+  }
+  assert {
+    condition     = length(jsondecode(aws_iam_role.team_admin.assume_role_policy).Statement[0].Principal.AWS) == 2
+    error_message = "Only explicitly configured team IAM users may assume the shared administrator role."
+  }
+  assert {
+    condition     = aws_iam_role_policy_attachment.team_admin.policy_arn == "arn:aws:iam::aws:policy/AdministratorAccess"
+    error_message = "The shared team administrator role must use the reviewed AWS AdministratorAccess policy."
+  }
+  assert {
+    condition = contains(one([
+      for statement in jsondecode(aws_iam_role_policy.team_admin_guardrail.policy).Statement : statement
+      if statement.Sid == "DenyTerraformRoleMutation"
+    ]).Action, "iam:UpdateAssumeRolePolicy")
+    error_message = "Team administrators must not modify Terraform role trust policies."
+  }
+  assert {
+    condition     = aws_iam_group_membership.team_users.users == toset(["example-team-user-a", "example-team-user-b"])
+    error_message = "Only configured team users may receive the base access policy."
   }
 }
 

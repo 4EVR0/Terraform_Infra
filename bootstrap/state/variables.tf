@@ -32,6 +32,24 @@ variable "terraform_operator_user_name" {
   }
 }
 
+variable "team_admin_user_names" {
+  description = "Existing human IAM users allowed to assume the MFA-protected shared team administrator role. Set through ignored local tfvars."
+  type        = set(string)
+  nullable    = false
+
+  validation {
+    condition = length(var.team_admin_user_names) > 0 && alltrue([
+      for name in var.team_admin_user_names : can(regex("^[A-Za-z0-9+=,.@_-]{1,64}$", name))
+    ])
+    error_message = "team_admin_user_names must contain at least one valid IAM user name."
+  }
+
+  validation {
+    condition     = !contains(var.team_admin_user_names, var.terraform_operator_user_name)
+    error_message = "The dedicated Terraform operator must not also be a shared team administrator user."
+  }
+}
+
 variable "terraform_plan_s3_bucket_arns" {
   description = "Project S3 bucket ARNs whose configuration Terraform must read during plan. Keep actual ARNs in ignored local tfvars."
   type        = set(string)
