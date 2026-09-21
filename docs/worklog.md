@@ -1074,3 +1074,18 @@ Terraform이 MFA 입력을 직접 처리하지 못하는 제약을 실제 실행
 - main branch protection에 `Format, validate, and test` 필수 검사 등록
 - 최신 main 기준 검사 요구, force push·branch 삭제 금지 확인
 - 실제 AWS plan은 향후 OIDC 읽기 전용 역할을 사용하는 별도 workflow로 분리
+
+## 2026-09-21 — Terraform 운영 아키텍처 문서화
+
+### 목적
+
+- 저장소를 처음 보는 사람이 변경 검증, 역할 분리, state와 관리 자원의 관계를 빠르게 파악
+- 현재 구현과 향후 OIDC plan 자동화를 구분해 과장 없이 표현
+- 실제 식별자와 접속 정보를 사용하지 않는 공개 구조도 작성
+
+### 구조도
+
+- GitHub PR 정적 검사부터 운영자의 MFA plan·apply, 비상 복구와 팀 일반 운영까지의 흐름 표현
+- S3 버킷 안에서 bootstrap state와 project state가 분리되는 구조 표현
+- bootstrap 관리, project 관리, 조회 참조와 외부 관리 자원의 경계 표현
+- 팀 테스트용 네트워크 예외와 CI의 AWS plan 미구현 상태 명시
