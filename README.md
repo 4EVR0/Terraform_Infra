@@ -146,6 +146,8 @@ python3 scripts/inventory.py --profile default --all-regions --expected-account-
 
 ## 다음 작업
 
+신규 앱 EC2와 RDS PostgreSQL의 구현 전 검토안은 [초대형 베타 EC2 + RDS 설계](docs/beta-ec2-rds-design.md)를 참고한다. 설계 문서의 병합은 자원 생성이나 IAM 권한 확대 승인이 아니다.
+
 Terraform 마이그레이션의 필수 작업은 완료. 이후 작업은 새로운 자원을 추가할 때 [AWS 인벤토리 관리 경계](docs/aws-management-boundary.md)를 갱신하고, 필요에 따라 정기 drift 탐지와 서비스 복구 시험을 별도 운영 개선으로 진행.
 
 PR에서 자동 실행되는 형식·구성·회귀 검사의 범위와 로컬 재현 방법은 [Terraform PR 자동 검증](docs/ci-validation.md) 참조.
