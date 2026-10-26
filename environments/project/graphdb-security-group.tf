@@ -14,6 +14,9 @@ resource "aws_security_group" "graphdb" {
   }
 }
 
+# Ingress rules may be retired by removing their reviewed key from local tfvars. Deletion is
+# guarded by scripts/check_ingress_cleanup_plan.py instead of prevent_destroy; the group itself
+# and egress rules keep prevent_destroy.
 resource "aws_vpc_security_group_ingress_rule" "graphdb" {
   for_each                     = var.graphdb_security_group.ingress
   security_group_id            = aws_security_group.graphdb.id
@@ -27,9 +30,6 @@ resource "aws_vpc_security_group_ingress_rule" "graphdb" {
   description                  = each.value.description
   tags                         = each.value.tags
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "graphdb" {

@@ -14,6 +14,9 @@ resource "aws_security_group" "monitoring" {
   }
 }
 
+# Ingress rules may be retired by removing their reviewed key from local tfvars. Deletion is
+# guarded by scripts/check_ingress_cleanup_plan.py instead of prevent_destroy; the group itself
+# and egress rules keep prevent_destroy.
 resource "aws_vpc_security_group_ingress_rule" "monitoring" {
   for_each                     = var.monitoring_security_group.ingress
   security_group_id            = aws_security_group.monitoring.id
@@ -26,9 +29,6 @@ resource "aws_vpc_security_group_ingress_rule" "monitoring" {
   referenced_security_group_id = each.value.referenced_security_group_id
   description                  = each.value.description
   tags                         = each.value.tags
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "monitoring" {
