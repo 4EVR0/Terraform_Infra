@@ -15,6 +15,9 @@ resource "aws_security_group" "airflow" {
   }
 }
 
+# Ingress rules may be retired by removing their reviewed key from local tfvars. Deletion is
+# guarded by scripts/check_ingress_cleanup_plan.py instead of prevent_destroy; the group itself
+# and egress rules keep prevent_destroy.
 resource "aws_vpc_security_group_ingress_rule" "airflow" {
   for_each                     = var.airflow_security_group.ingress
   security_group_id            = aws_security_group.airflow.id
@@ -28,9 +31,6 @@ resource "aws_vpc_security_group_ingress_rule" "airflow" {
   description                  = each.value.description
   tags                         = each.value.tags
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "aws_vpc_security_group_egress_rule" "airflow" {
