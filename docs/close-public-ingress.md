@@ -75,8 +75,9 @@
 
 - Airflow 8080 공개 규칙: 사용자가 콘솔에서 다시 만들고, 로컬 설정에 같은 키(`ingress_tcp_8080_ipv4`)로 새 규칙 ID를 넣어 import만 적용(`1 imported, 0 added, 0 changed, 0 destroyed`)
 - 팀 시험용 그룹: 사용자가 Airflow·모니터링 EC2에 다시 연결. 로컬 설정의 두 인스턴스 보안 그룹 목록에 추가해 Terraform 구성과 맞춤
-- 결과 plan: **No changes**. 공개 인바운드는 Airflow 8080, 시험용 그룹의 SSH 22(Airflow·모니터링)가 다시 열린 상태
-- 모니터링 3000·8501·9090 공개분과 GraphDB 7474는 삭제 상태 유지
+- 모니터링 8501(Iceberg UI)·3000(Grafana)·9090(Prometheus) 공개 규칙: 사용자가 콘솔에서 원래 설명 그대로 다시 만들고, 원래 키(`rule_01`·`rule_05`·`rule_06`)로 새 규칙 ID를 넣어 import만 적용(`3 imported, 0 added, 0 changed, 0 destroyed`)
+- 결과 plan: **No changes**. 다시 열린 공개 인바운드: Airflow 8080, 모니터링 8501·3000·9090, 시험용 그룹의 SSH 22(Airflow·모니터링)
+- GraphDB 7474(Neo4j 브라우저)만 삭제 상태 유지
 - 다시 닫을 때는 이 문서의 절차를 따른다. 단 시험용 그룹 분리는 적용 역할 권한이 없으므로 콘솔에서 하거나 bootstrap 정책을 먼저 보완한다
 
 ## 후속
